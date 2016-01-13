@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <link rel="shortcut icon" href="resources/favicon.ico">
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
+  <style>
+    @import url("node_modules/codemirror/lib/codemirror.css");
+    @import url("style.css?20120730");
+  </style>
+  <script src="node_modules/codemirror/lib/codemirror.js"></script>
+  <script src="node_modules/codemirror/mode/javascript/javascript.js"></script>
+  <script src="node_modules/bluebird/js/browser/bluebird.min.js"></script>
+  <script src="tutorials.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <strong>Platform</strong> <img src="resources/logo-linkurious.png" alt="Linkurious" height="12" />
+    </div>
+    <nav>
+      <ul>
+        <li><a href="/">Overview</a></li>
+        <li><a href="#" class="active">Tutorials</a></li>
+        <li><a href="http://linkurio.us/docs/api/">API</a></li>
+        <li><a href="#">Support</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div id="main-content">
+    <section>
+      <article id="alerts"></article>
+      <h1 id="title"></h1>
+      <article id="instructions"></article>
+      <article id="code"></article>
+      <article>
+        <button id='run-btn' type="button" onclick="LKTutorials.runScript();">Run script</button>
+        <button id='cheat-btn' type="button" onclick="LKTutorials.cheat();">Cheat</button>
+        <button id='reset-btn' type="button" onclick="LKTutorials.resetScript();">Reset</button>
+      </article>
+      <article id="output-container" style='display:none'>
+        <iframe id="output" style="pointer-events:none;" frameborder="0" style="border:0;"></iframe>
+      </article>
+      <!--footer><a href="#">Back to top.</a></footer-->
+    </section>
+  </div>
+
+  <nav id="left-sidebar">
+    <div id="toc"></div>
+  </nav>
+  <div style="clear: both;"></div>
+
+  <script>
+    var queryString = LKTutorials.getQueryString(location.search.substr(1)); // substr removes "?"
+
+    document.addEventListener('DOMContentLoaded', function() {
+      LKTutorials.init(queryString.lesson, queryString.unit, queryString.exercise);
+    }, false );
+  </script>
+</body>
+</html>

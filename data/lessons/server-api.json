@@ -1,0 +1,24 @@
+[
+  {
+    "title": "Getting started",
+    "id": "getting-started",
+    "exercises": [
+      {
+        "title": "Get server status",
+        "id": "server-status"
+      }, {
+        "title": "Log in",
+        "id": "log-in"
+      }, {
+        "title": "Get datasource status",
+        "id": "datasource-status"
+      }, {
+        "title": "Get datasource key",
+        "id": "datasource-key"
+      }, {
+        "title": "Log out",
+        "id": "log-out"
+      }
+    ]
+  }
+]

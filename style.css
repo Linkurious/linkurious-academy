@@ -1,0 +1,279 @@
+@font-face {
+  font-family: 'Menlo Regular';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Menlo Regular'), url('resources/Menlo-Regular.woff') format('woff');
+}
+
+
+
+body {
+    margin: 0;
+    font-family: 'Lato', 'Helvetica Neue', Helvetica, sans-serif;
+    background-color: #f2f2f2;
+    color: #313042;
+}
+#main-content {
+    position: absolute;
+    left: 220px;
+    right: 0px;
+    padding: 20px;
+}
+#left-sidebar {
+    position: fixed;
+    overflow-x: hidden;
+    overflow-y: auto;
+    left: 0px;
+    width: 220px;
+    height: 100%;
+    padding-top: 20px;
+    border-right: 1px solid #DEDEDE;
+}
+
+
+
+h1 {
+  font-size: 35px;
+  font-weight: 400;
+  letter-spacing: -2px;
+  margin: .3em 0 .1em 0;
+  font-variant: small-caps;
+  color: #1E1D32;
+}
+
+h2 {
+  margin-top: 2em;
+}
+
+h1, h2 {
+  text-rendering: optimizeLegibility;
+}
+
+h2 a {
+  color: #ccc;
+  left: -20px;
+  position: absolute;
+  width: 740px;
+}
+
+header {
+  background: #1E1D32;
+  color: #fff;
+  height: 68px;
+  border-bottom: 1px solid #141229;
+  box-shadow: 0px 1px 3px 1px rgba(46, 46, 46, 0.3), inset rgba(255, 255, 255, 0.2) 0 1px 1px;
+}
+
+header > .logo {
+  float: left;
+  font-weight: 400;
+  line-height: 28px;
+  margin: 20px;
+}
+
+header > .logo > strong {
+  font-size: 28px;
+}
+
+header > nav > ul {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 28px;
+}
+
+header > nav > ul > li {
+  float: left;
+  position: relative;
+  display: block;
+  width: auto;
+}
+
+header > nav > ul > li > a {
+  display: block;
+  color: #fff;
+  font-size: 15px;
+  padding: 20px 13px;
+  text-decoration: none;
+}
+
+header > nav > ul > li > a.active,
+header > nav > ul > li > a:hover {
+  color: #EA5565;
+  background: #141229;
+}
+
+footer {
+  margin-top: 8em;
+}
+
+aside {
+  font-size: small;
+  left: 770px;
+  position: absolute;
+  text-align: right;
+  width: 180px;
+  padding: 10px 0;
+  line-height: 1.5em;
+}
+
+section {
+  margin: 1em auto 4em auto;
+  position: relative;
+  height: 100%;
+}
+
+p {
+  line-height: 1.5em;
+  width: 720px;
+}
+
+blockquote {
+  width: 640px;
+}
+
+a {
+  color: #EA5565;
+}
+
+a:hover,
+a:active {
+  color: #EA5565;
+}
+
+a:not(:hover) {
+  text-decoration: none;
+}
+
+pre, code, textarea {
+  font-family: 'Menlo Regular', monospace;
+  font-size: 13px;
+  line-height: normal;
+}
+
+textarea {
+  font-size: 100%;
+}
+
+article {
+  min-width: 680px;
+  max-width: 960px;
+  width: 100%;
+}
+
+pre {
+  padding-left: 18px;
+  margin: 2em 0 2em -20px;
+  overflow-x: auto;
+}
+
+.hljs {
+  background: #fff;
+}
+
+iframe {
+  width: 100%;
+  height: 300px;
+  border: 1px solid #DEDEDE;
+  background-color: #fff;
+  border-radius: 6px;
+  margin: 10px 0;
+}
+
+#instructions {
+  padding: 10px;
+  line-height: 1.5em;
+}
+#code {
+  margin-bottom: 10px;
+}
+
+nav > ul,
+#toc > ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+#toc > strong {
+  font-size: 16px;
+  padding: 10px;
+  color: #1E1D32;
+}
+
+#toc > ul {
+  line-height: 1.5em;
+  font-size: 14px;
+  margin: 10px 0;
+
+}
+
+#toc > ul > li {
+  padding: 0 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: 1.5em;
+}
+
+.alert {
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #fff;
+  border: 1px solid #DEDEDE;
+}
+.alert.success {
+  color: #3c763d;
+  border-left: 3px solid #3c763d;
+}
+.alert.info {
+  color: #31708f;
+  border-left: 3px solid #31708f;
+}
+.alert.warning {
+  color: #8a6d3b;
+  border-left: 3px solid #8a6d3b;
+}
+.alert.danger {
+  color: #a94442;
+  border-left: 3px solid #a94442;
+}
+
+.CodeMirror {
+  height: auto;
+  border: 1px solid #DEDEDE;
+  font-family: 'Menlo Regular', monospace;
+  font-size: 15px;
+}
+
+::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+::-webkit-scrollbar-button {
+  width: 0px;
+  height: 0px;
+}
+::-webkit-scrollbar-thumb {
+  background: #666666;
+  border: 0;
+  border-radius: 50px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #000000;
+}
+::-webkit-scrollbar-thumb:active {
+  background: #000000;
+}
+::-webkit-scrollbar-track {
+  background: #DEDEDE;
+  border: 0;
+  border-radius: 50px;
+}
+::-webkit-scrollbar-track:hover {
+  background: #DEDEDE;
+}
+::-webkit-scrollbar-track:active {
+  background: #DEDEDE;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
