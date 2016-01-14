@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    @import url("/lib/highlight/styles/github.css?20160106");
+  </style>
+  <script src="/lib/highlight/highlight.pack.js"></script> <!--https://highlightjs.org/-->
+</head>
+<body>
+  <article id="response">Loading...</article>
+
+<script>
+'use strict';
+
+var LKTutorials = window.parent.LKTutorials;
+
+function test(xhr, response) {
+  var content,
+    pass = false;
+
+  if (response !== undefined) {
+    content = JSON.stringify(response, null, ' ');
+    pass = validate(response);
+  }
+  else {
+    content = xhr;
+    pass = validate(xhr);
+  }
+  var preElt = document.createElement('pre');
+  var codeElt = document.createElement('code');
+  codeElt.textContent = content;
+  hljs.highlightBlock(codeElt);
+  preElt.appendChild(codeElt);
+  document.getElementById('response').replaceChild(
+    preElt,
+    document.getElementById('response').firstChild
+  );
+  if (pass) {
+    LKTutorials.onResultSuccess();
+  }
+  else {
+    LKTutorials.onResultError();
+  }
+}
+
+function error(e, xhr, response) {
+  document.getElementById('response').textContent = e;
+  LKTutorials.onResultError();
+}
+
+function run(submittedCode) {
+  try {
+    eval(submittedCode);
+  } catch(e) {
+    var msg = e.name + ': ' + e.message;
+    document.getElementById('response').textContent = msg;
+    LKTutorials.onResultError();
+  }
+}
+
+LKTutorials.onResultFrameReady();
+</script>
+</body>
+</html>

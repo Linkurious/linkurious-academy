@@ -1,3 +1,5 @@
+'use strict';
+
 var LKTutorials = {};
 
 (function (window) {
@@ -9,6 +11,7 @@ var LKTutorials = {};
     _lessons = {},
     _units = [],
     _unitsIndex = Object.create(null),
+    _exercisesIndex = Object.create(null),
     _curExercise,
 
     _codeMirror,
@@ -16,38 +19,30 @@ var LKTutorials = {};
     _iframeElt;
 
 
-  LKTutorials.init = function(lesson, unit, exercise) {
+  LKTutorials.init = function(lessonId, unitId, exerciseId) {
     LKTutorials.loadLessons()
     .then(function() {
-      return LKTutorials.loadLesson(lesson);
+      return LKTutorials.loadLesson(lessonId);
     })
     .then(function() {
-      return LKTutorials.loadExercise(lesson, unit, exercise)
+      return LKTutorials.loadExercise(lessonId, unitId, exerciseId)
       .catch(function(err) {
-        console.log(err);
-        if (exercise !== undefined) {
+        if (exerciseId !== undefined) {
           notify(err, 'warning');
         }
         else {
-          document.getElementById('instructions').innerHTML = 'Welcome!';
+          LKTutorials.loadExercise(lessonId, _units[0].id, _units[0].exercises[0].id);
         }
       });
     });
 
 
-// console.log(lesson, unit, exercise);
-
     _iframeContainerElt = document.getElementById('output-container');
     _iframeElt = document.getElementById('output');
 
-    // Enable output zooming with mouse scroll when the user mouse enters the output
-    _iframeContainerElt.addEventListener('mouseenter', onMouseenterHandler);
-
-    if (exercise !== undefined) {
-      document.title = lesson + ' - ' + unit + ': ' + exercise;
-      document.getElementById('title').textContent = exercise;
+    if (exerciseId !== undefined) {
+      document.title = 'linkurious-academy/' + lessonId + '/' + unitId + '/' + exerciseId;
     }
-
   };
 
   LKTutorials.loadLessons = function() {
@@ -59,12 +54,14 @@ var LKTutorials = {};
     });
   };
 
-  LKTutorials.loadLesson = function(lesson) {
-    if (!(lesson !== undefined && isLesson(lesson)))
+  LKTutorials.loadLesson = function(lessonId) {
+    if (!(lessonId !== undefined && isLesson(lessonId)))
       return Promise.reject('Unknown lesson');
 
+    document.getElementById('lesson').textContent = _lessons[lessonId].title;
+
     return new Promise(function(resolve, reject) {
-      httpGetAsync('/lessons/' + lesson + '.json').then(function(res) {
+      httpGetAsync('/lessons/' + lessonId + '.json').then(function(res) {
         _units = JSON.parse(res);
 
         var tocContent = _units.map(function(unit) {
@@ -73,9 +70,12 @@ var LKTutorials = {};
           // Build HTML nav list
           var name = '<strong>' + unit.title + '</strong>';
           var list = '<ul>' + unit.exercises.map(function(exercise) {
+            _exercisesIndex[exercise.id] = exercise;
             return [
-              '<li><a href="#" onclick="LKTutorials.loadExercise(\'',
-              lesson + '\',\'',
+              '<li><a href="#" data-id="',
+              lessonId + '/' + unit.id + '/' + exercise.id,
+              '" onclick="LKTutorials.loadExercise(\'',
+              lessonId + '\',\'',
               unit.id + '\',\'',
               exercise.id,
               '\');">',
@@ -96,9 +96,12 @@ var LKTutorials = {};
     });
   };
 
-  LKTutorials.loadExercise = function(lesson, unit, exercise) {
+  LKTutorials.loadExercise = function(lessonId, unitId, exerciseId) {
+    // Reset UI
     resetNotifications();
     _iframeContainerElt.style.display = 'none';
+    document.getElementById('next-btn').disabled = 'disabled';
+    document.getElementById('validation-output').textContent = '';
     _iframeElt.src = '';
 
     if (_codeMirror) {
@@ -106,25 +109,43 @@ var LKTutorials = {};
       _codeMirror.clearHistory();
     }
 
-    if (!isExercise(lesson, unit, exercise))
+    var liList = document.getElementById('toc').getElementsByTagName('li');
+    var exerciseSignature = lessonId + '/' + unitId + '/' + exerciseId;
+    for (var i=0; i< liList.length; i++) {
+      liList[i].className = '';
+      if(liList[i].firstChild.dataset.id === exerciseSignature) {
+        liList[i].className = 'active';
+      }
+    }
+
+    if (!isExercise(lessonId, unitId, exerciseId))
       return Promise.reject('Unknown exercise');
 
     _curExercise = {
-      id: exercise,
-      title: null,
-      path: exercisePath(lesson, unit, exercise),
+      lessonId: lessonId,
+      unitId: unitId,
+      id: exerciseId,
+      title: _exercisesIndex[exerciseId].title,
+      path: exercisePath(lessonId, unitId, exerciseId),
       defaultCode: null,
       cheatCode: null,
       validationCode: null,
       resultCode: null
     };
 
+    document.getElementById('title').textContent = _curExercise.title;
+
+    // Load exercise data in parallel, continue after all data is loaded
     return Promise.join(
-      httpGetAsync(exercisePath(lesson, unit, exercise) + 'instructions.html').then(function(res) {
+      httpGetAsync(exercisePath(lessonId, unitId, exerciseId) + 'instructions.html')
+      .then(function(res) {
         document.getElementById('instructions').innerHTML = res;
       })
-      .catch(function(err) { notify('Instructions ' + err.statusText, 'danger'); }),
-      httpGetAsync(exercisePath(lesson, unit, exercise) + 'default-code.js').then(function(res) {
+      .catch(function(err) {
+        notify('Instructions ' + err.statusText, 'danger');
+      }),
+
+      httpGetAsync(exercisePath(lessonId, unitId, exerciseId) + 'default-code.js').then(function(res) {
         _curExercise.defaultCode = res;
 
         _codeMirror = _codeMirror || CodeMirror(document.getElementById('code'), {
@@ -132,21 +153,26 @@ var LKTutorials = {};
           mode: 'javascript'
         });
         _codeMirror.setValue(res);
+        _codeMirror.focus();
 
       })
-      .catch(function(err) { notify('Default code ' + err.statusText, 'danger'); }),
-      httpGetAsync(exercisePath(lesson, unit, exercise) + 'cheat-code.js').then(function(res) {
+      .catch(function(err) {
+        notify('Default code ' + err.statusText, 'danger');
+      }),
+
+      httpGetAsync(exercisePath(lessonId, unitId, exerciseId) + 'cheat-code.js').then(function(res) {
         _curExercise.cheatCode = res;
       })
-      .catch(function(err) { notify('Cheat code ' + err.statusText, 'danger'); }),
-      httpGetAsync(exercisePath(lesson, unit, exercise) + 'validation-code.js').then(function(res) {
-        _curExercise.validationCode = res;
-      })
-      .catch(function(err) { notify('Validation code ' + err.statusText, 'danger'); }),
-      httpGetAsync(exercisePath(lesson, unit, exercise) + 'result.html').then(function(res) {
+      .catch(function(err) {
+        notify('Cheat code ' + err.statusText, 'danger');
+      }),
+
+      httpGetAsync(lessonPath(lessonId) + 'result.html').then(function(res) {
         _curExercise.resultCode = res;
       })
-      .catch(function(err) { notify('Result code ' + err.statusText, 'danger'); })
+      .catch(function(err) {
+        notify('Result code ' + err.statusText, 'danger');
+      })
     );
   };
 
@@ -156,19 +182,60 @@ var LKTutorials = {};
 
   LKTutorials.resetScript = function() {
     _codeMirror.setValue(_curExercise.defaultCode);
+    _iframeContainerElt.style.display = 'none';
+    document.getElementById('validation-output').textContent = '';
   };
 
   LKTutorials.runScript = function() {
-    var code = _codeMirror.getValue();
-
-    // TODO validate code
-
     // sandbox
-    _iframeElt.src = fixUrl(_curExercise.path + 'result.html');
+    _iframeElt.src = fixUrl(lessonPath(_curExercise.lessonId) + 'result.html');
     _iframeContainerElt.style.display = '';
-    _iframeElt.contentWindow.eval(code);
+  };
 
+  LKTutorials.onResultFrameReady = function() {
+    _iframeElt.contentWindow.qwest = qwest;
+    httpGetAsync(exercisePath(_curExercise.lessonId, _curExercise.unitId, _curExercise.id) + 'validation-code.js')
+    .then(function(res) {
+      _curExercise.validationCode = res;
+      _iframeElt.contentWindow.eval(_curExercise.validationCode);
+      _iframeElt.contentWindow.run(_codeMirror.getValue());
+    })
+    .catch(function(err) {
+      notify('Validation code ' + err.statusText, 'danger');
+    });
+  };
 
+  LKTutorials.onResultSuccess = function() {
+    // The student passed the exercice
+    document.getElementById('next-btn').disabled = '';
+    document.getElementById('validation-output').textContent = 'SUCCESS';
+    document.getElementById('validation-output').style.color = 'green';
+  };
+
+  LKTutorials.onResultError = function() {
+    // The student failed the exercice
+    document.getElementById('next-btn').disabled = 'disabled';
+    document.getElementById('validation-output').textContent = 'FAIL';
+    document.getElementById('validation-output').style.color = 'red';
+  };
+
+  LKTutorials.nextExercice = function() {
+    var nextUnitId = _curExercise.unitId;
+    var nextExerciseId = _exercisesIndex[_curExercise.id].next;
+
+    if (!nextExerciseId) {
+      nextUnitId = _unitsIndex[_curExercise.unitId].next;
+      nextExerciseId = _unitsIndex[nextUnitId].exercises[0].id;
+    }
+
+    if (nextExerciseId) {
+      this.loadExercise(_curExercise.lessonId, nextUnitId, nextExerciseId);
+    }
+    else {
+      // No next exercise
+      document.getElementById('next-btn').disabled = 'disabled';
+      notify('You have completed the last exercise. Congratulations!', 'info');
+    }
   };
 
   /**
@@ -192,38 +259,15 @@ var LKTutorials = {};
 
 
   //**********************
-  // Functions to disable page scroll over an iframe
-  //**********************
-
-  // Disable scroll zooming and bind back the mouseenter event
-  function onMouseleaveHandler(event) {
-    _iframeContainerElt.addEventListener('mouseenter', onMouseenterHandler);
-    _iframeContainerElt.removeEventListener('mouseleave', onMouseleaveHandler);
-    _iframeElt.style.pointerEvents = 'none';
-  }
-
-  function onMouseenterHandler(event) {
-    // Disable the mouseenter handler until the user leaves the output area
-    _iframeContainerElt.removeEventListener('mouseenter', onMouseenterHandler);
-
-    // Enable scrolling zoom
-    _iframeElt.style.pointerEvents = 'auto';
-
-    // Handle the mouse leave event
-    _iframeContainerElt.addEventListener('mouseleave', onMouseleaveHandler);
-  }
-
-
-  //**********************
   // Utils
   //**********************
 
-  function isLesson(lesson) {
-    return lesson !== undefined && lesson in _lessons;
+  function isLesson(lessonId) {
+    return lessonId !== undefined && lessonId in _lessons;
   };
 
-  function isUnit(lesson, unit) {
-    return isLesson(lesson) && unit in _unitsIndex;
+  function isUnit(lessonId, unitId) {
+    return isLesson(lessonId) && unitId in _unitsIndex;
   };
 
   function isExercise(lessonId, unitId, exerciseId) {
@@ -234,12 +278,16 @@ var LKTutorials = {};
       }).length != 0;
   };
 
-  function unitPath(lesson, unit) {
-    return '/lessons/' + lesson + '/' + unit + '/';
+  function lessonPath(lessonId) {
+    return '/lessons/' + lessonId + '/';
   }
 
-  function exercisePath(lesson, unit, exercise) {
-    return unitPath(lesson, unit) + exercise + '/';
+  function unitPath(lessonId, unitId) {
+    return lessonPath(lessonId) + unitId + '/';
+  }
+
+  function exercisePath(lessonId, unitId, exerciseId) {
+    return unitPath(lessonId, unitId) + exerciseId + '/';
   }
 
   function fixUrl(url) {

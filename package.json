@@ -1,7 +1,7 @@
 {
   "name": "linkurious-academy",
   "version": "0.1.0",
-  "description": "",
+  "description": "Front-end application to create coding tutorials related to the Linkurious server API or Ogma",
   "keyboards": [
     "graph",
     "visualization",
@@ -20,7 +20,8 @@
   "main": "Gruntfile.js",
   "dependencies": {
     "bluebird": "~3.0.6",
-    "codemirror": "~5.10.0"
+    "codemirror": "~5.10.0",
+    "qwest": "~3.0.0"
   },
   "devDependencies": {
     "http-server": "~0.8.0"

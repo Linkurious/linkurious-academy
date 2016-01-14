@@ -1,24 +1,46 @@
 [
   {
+    "title": "Introduction",
+    "id": "intro",
+    "next": "getting-started",
+    "exercises": [
+      {
+        "title": "Introduction",
+        "id": "intro"
+      }
+    ]
+  },
+  {
     "title": "Getting started",
     "id": "getting-started",
+    "next": "open-ui",
     "exercises": [
       {
         "title": "Get server status",
-        "id": "server-status"
+        "id": "server-status",
+        "next": "log-in"
       }, {
         "title": "Log in",
-        "id": "log-in"
+        "id": "log-in",
+        "next": "datasource-status"
       }, {
         "title": "Get datasource status",
-        "id": "datasource-status"
+        "id": "datasource-status",
+        "next": "datasource-key"
       }, {
         "title": "Get datasource key",
-        "id": "datasource-key"
+        "id": "datasource-key",
+        "next": "log-out"
       }, {
         "title": "Log out",
         "id": "log-out"
       }
+    ]
+  },
+  {
+    "title": "Open user interface",
+    "id": "open-ui",
+    "exercises": [
     ]
   }
 ]

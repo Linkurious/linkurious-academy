@@ -9,6 +9,7 @@
     @import url("node_modules/codemirror/lib/codemirror.css");
     @import url("style.css?20120730");
   </style>
+  <script src="node_modules/qwest/qwest.min.js"></script>
   <script src="node_modules/codemirror/lib/codemirror.js"></script>
   <script src="node_modules/codemirror/mode/javascript/javascript.js"></script>
   <script src="node_modules/bluebird/js/browser/bluebird.min.js"></script>
@@ -37,18 +38,22 @@
       <article id="instructions"></article>
       <article id="code"></article>
       <article>
-        <button id='run-btn' type="button" onclick="LKTutorials.runScript();">Run script</button>
+        <button id='run-btn' type="button" onclick="LKTutorials.runScript();">&#9658; Validate</button>
         <button id='cheat-btn' type="button" onclick="LKTutorials.cheat();">Cheat</button>
-        <button id='reset-btn' type="button" onclick="LKTutorials.resetScript();">Reset</button>
+        <button id='reset-btn' type="button" onclick="LKTutorials.resetScript();">&#8635; Reset</button>
+        <button id="next-btn" type="button" onclick="LKTutorials.nextExercice();">Next exercise</button>
+        <span id="validation-output"></span>
       </article>
       <article id="output-container" style='display:none'>
-        <iframe id="output" style="pointer-events:none;" frameborder="0" style="border:0;"></iframe>
+        <h3>Result</h3>
+        <iframe id="output" frameborder="0" style="border:0;"></iframe>
       </article>
       <!--footer><a href="#">Back to top.</a></footer-->
     </section>
   </div>
 
   <nav id="left-sidebar">
+    <div id="lesson"></div>
     <div id="toc"></div>
   </nav>
   <div style="clear: both;"></div>

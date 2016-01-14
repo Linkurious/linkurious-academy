@@ -30,6 +30,11 @@ body {
     border-right: 1px solid #DEDEDE;
 }
 
+#lesson {
+  margin: 0 10px 10px 10px;
+  font-size: larger;
+  font-weight: bold;
+}
 
 
 h1 {
@@ -54,6 +59,10 @@ h2 a {
   left: -20px;
   position: absolute;
   width: 740px;
+}
+
+h3 {
+  margin: 1em 0 0.5em 0;
 }
 
 header {
@@ -117,14 +126,9 @@ aside {
 }
 
 section {
-  margin: 1em auto 4em auto;
+  margin: 1em auto;
   position: relative;
   height: 100%;
-}
-
-p {
-  line-height: 1.5em;
-  width: 720px;
 }
 
 blockquote {
@@ -150,6 +154,12 @@ pre, code, textarea {
   line-height: normal;
 }
 
+p > code {
+  background-color: #fff;
+  border: 1px solid #DEDEDE;
+  padding: 1px;
+}
+
 textarea {
   font-size: 100%;
 }
@@ -172,7 +182,7 @@ pre {
 
 iframe {
   width: 100%;
-  height: 300px;
+  height: 200px;
   border: 1px solid #DEDEDE;
   background-color: #fff;
   border-radius: 6px;
@@ -212,6 +222,14 @@ nav > ul,
   overflow: hidden;
   text-overflow: ellipsis;
   height: 1.5em;
+}
+
+#toc > ul > li.active {
+  background-color: #DEDEDE;
+}
+
+#next-btn {
+  float: right;
 }
 
 .alert {
