@@ -36,12 +36,11 @@ var LKTutorials = {};
       });
     });
 
-
     _iframeContainerElt = document.getElementById('output-container');
     _iframeElt = document.getElementById('output');
 
     if (exerciseId !== undefined) {
-      document.title = 'linkurious-academy/' + lessonId + '/' + unitId + '/' + exerciseId;
+      setPageTitle(lessonId, unitId, exerciseId);
     }
   };
 
@@ -102,6 +101,7 @@ var LKTutorials = {};
     _iframeContainerElt.style.display = 'none';
     document.getElementById('next-btn').disabled = 'disabled';
     document.getElementById('validation-output').textContent = '';
+    document.getElementById('instructions').innerHTML = '';
     _iframeElt.src = '';
 
     if (_codeMirror) {
@@ -133,7 +133,7 @@ var LKTutorials = {};
       resultCode: null
     };
 
-    document.getElementById('title').textContent = _curExercise.title;
+    setPageTitle(lessonId, unitId, exerciseId);
 
     // Load exercise data in parallel, continue after all data is loaded
     return Promise.join(
@@ -178,6 +178,7 @@ var LKTutorials = {};
 
   LKTutorials.cheat = function() {
     _codeMirror.setValue(_curExercise.cheatCode);
+    this.runScript();
   };
 
   LKTutorials.resetScript = function() {
@@ -193,6 +194,7 @@ var LKTutorials = {};
   };
 
   LKTutorials.onResultFrameReady = function() {
+    _iframeElt.contentWindow.Promise = Promise;
     _iframeElt.contentWindow.qwest = qwest;
     httpGetAsync(exercisePath(_curExercise.lessonId, _curExercise.unitId, _curExercise.id) + 'validation-code.js')
     .then(function(res) {
@@ -225,7 +227,9 @@ var LKTutorials = {};
 
     if (!nextExerciseId) {
       nextUnitId = _unitsIndex[_curExercise.unitId].next;
-      nextExerciseId = _unitsIndex[nextUnitId].exercises[0].id;
+      if (_unitsIndex[nextUnitId].exercises && _unitsIndex[nextUnitId].exercises.length) {
+        nextExerciseId = _unitsIndex[nextUnitId].exercises[0].id;
+      }
     }
 
     if (nextExerciseId) {
@@ -261,6 +265,13 @@ var LKTutorials = {};
   //**********************
   // Utils
   //**********************
+
+  function setPageTitle(lessonId, unitId, exerciseId) {
+    document.title = 'linkurious-academy/' + lessonId + '/' + unitId + '/' + exerciseId;
+    if (_curExercise && _curExercise.title) {
+      document.getElementById('title').textContent = _curExercise.title;
+    }
+  }
 
   function isLesson(lessonId) {
     return lessonId !== undefined && lessonId in _lessons;

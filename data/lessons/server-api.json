@@ -18,19 +18,15 @@
       {
         "title": "Get server status",
         "id": "server-status",
+        "next": "datasource-status"
+      }, {
+        "title": "Discover datasources",
+        "id": "datasource-status",
         "next": "log-in"
       }, {
         "title": "Log in",
         "id": "log-in",
         "next": "datasource-status"
-      }, {
-        "title": "Get datasource status",
-        "id": "datasource-status",
-        "next": "datasource-key"
-      }, {
-        "title": "Get datasource key",
-        "id": "datasource-key",
-        "next": "log-out"
       }, {
         "title": "Log out",
         "id": "log-out"
@@ -41,6 +37,30 @@
     "title": "Open user interface",
     "id": "open-ui",
     "exercises": [
+      {
+        "title": "Open with a single node",
+        "id": "one-node",
+        "next": "one-edge"
+      },
+      {
+        "title": "Open with a single edge",
+        "id": "one-edge",
+        "next": "one-node-neighborhood"
+      },
+      {
+        "title": "Open with node connections",
+        "id": "one-node-neighborhood",
+        "next": "one-node-neighborhood"
+      },
+      {
+        "title": "Open with a search query",
+        "id": "search-query",
+        "next": "graph-query"
+      },
+      {
+        "title": "Open with a graph query",
+        "id": "graph-query"
+      }
     ]
   }
 ]

@@ -16,32 +16,31 @@
 var LKTutorials = window.parent.LKTutorials;
 
 function test(xhr, response) {
-  var content,
-    pass = false;
+  var answer = (response !== undefined) ? response : xhr;
 
-  if (response !== undefined) {
-    content = JSON.stringify(response, null, ' ');
-    pass = validate(response);
+  var content = JSON.stringify(answer, null, '  '); // indent with 2 space blocks
+
+  function setResult(content) {
+    content = (answer !== '') ? content : 'No Content';
+    var preElt = document.createElement('pre');
+    var codeElt = document.createElement('code');
+    codeElt.textContent = content;
+    hljs.highlightBlock(codeElt);
+    preElt.appendChild(codeElt);
+    document.getElementById('response').replaceChild(
+      preElt,
+      document.getElementById('response').firstChild
+    );
   }
-  else {
-    content = xhr;
-    pass = validate(xhr);
-  }
-  var preElt = document.createElement('pre');
-  var codeElt = document.createElement('code');
-  codeElt.textContent = content;
-  hljs.highlightBlock(codeElt);
-  preElt.appendChild(codeElt);
-  document.getElementById('response').replaceChild(
-    preElt,
-    document.getElementById('response').firstChild
-  );
-  if (pass) {
+
+  validate(answer).then(function() {
+    setResult(content);
     LKTutorials.onResultSuccess();
-  }
-  else {
+  })
+  .catch(function() {
+    setResult(content);
     LKTutorials.onResultError();
-  }
+  });
 }
 
 function error(e, xhr, response) {

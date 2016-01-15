@@ -1,6 +1,6 @@
-function validate(answser) {
+function validate(answer) {
   return new Promise(function(resolve, reject) {
-    if (answser == 42) {
+    if (answer && answer.sources && answer.sources.length) {
       resolve();
     }
     else {
