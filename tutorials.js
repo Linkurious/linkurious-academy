@@ -48,6 +48,10 @@ var LKTutorials = {};
     return new Promise(function(resolve, reject) {
       httpGetAsync('/lessons.json').then(function(res) {
         _lessons = JSON.parse(res);
+        _units = [];
+        _unitsIndex = Object.create(null);
+        _exercisesIndex = Object.create(null);
+        _curExercise = undefined;
         resolve();
       });
     });
@@ -69,7 +73,7 @@ var LKTutorials = {};
           // Build HTML nav list
           var name = '<strong>' + unit.title + '</strong>';
           var list = '<ul>' + unit.exercises.map(function(exercise) {
-            _exercisesIndex[exercise.id] = exercise;
+            _exercisesIndex[getUEID(lessonId, unit.id, exercise.id)] = exercise;
             return [
               '<li><a href="#" data-id="',
               lessonId + '/' + unit.id + '/' + exercise.id,
@@ -96,6 +100,8 @@ var LKTutorials = {};
   };
 
   LKTutorials.loadExercise = function(lessonId, unitId, exerciseId) {
+    var ueid = getUEID(lessonId, unitId, exerciseId);
+
     // Reset UI
     resetNotifications();
     _iframeContainerElt.style.display = 'none';
@@ -125,7 +131,9 @@ var LKTutorials = {};
       lessonId: lessonId,
       unitId: unitId,
       id: exerciseId,
-      title: _exercisesIndex[exerciseId].title,
+      ueid: ueid,
+      textOnly: !!_exercisesIndex[ueid].textOnly,
+      title: _exercisesIndex[ueid].title,
       path: exercisePath(lessonId, unitId, exerciseId),
       defaultCode: null,
       cheatCode: null,
@@ -134,6 +142,27 @@ var LKTutorials = {};
     };
 
     setPageTitle(lessonId, unitId, exerciseId);
+
+    if (_curExercise.textOnly) {
+      document.getElementById('code').style.display = 'none';
+      document.getElementById('run-btn').style.display = 'none';
+      document.getElementById('cheat-btn').style.display = 'none';
+      document.getElementById('reset-btn').style.display = 'none';
+      document.getElementById('next-btn').disabled = '';
+
+      return httpGetAsync(exercisePath(lessonId, unitId, exerciseId) + 'instructions.html')
+      .then(function(res) {
+        document.getElementById('instructions').innerHTML = res;
+      })
+      .catch(function(err) {
+        notify('Instructions ' + err.statusText, 'danger');
+      });
+    }
+
+    document.getElementById('code').style.display = '';
+    document.getElementById('run-btn').style.display = '';
+    document.getElementById('cheat-btn').style.display = '';
+    document.getElementById('reset-btn').style.display = '';
 
     // Load exercise data in parallel, continue after all data is loaded
     return Promise.join(
@@ -223,7 +252,7 @@ var LKTutorials = {};
 
   LKTutorials.nextExercice = function() {
     var nextUnitId = _curExercise.unitId;
-    var nextExerciseId = _exercisesIndex[_curExercise.id].next;
+    var nextExerciseId = _exercisesIndex[_curExercise.ueid].next;
 
     if (!nextExerciseId) {
       nextUnitId = _unitsIndex[_curExercise.unitId].next;
@@ -303,6 +332,11 @@ var LKTutorials = {};
 
   function fixUrl(url) {
     return _ROOT + url + _VERSION;
+  }
+
+  // Generate Unique Exercise IDentifier
+  function getUEID(lessonId, unitId, exerciseId) {
+    return [lessonId, unitId, exerciseId].join('/');
   }
 
   function notify(message, type) {

@@ -4,10 +4,33 @@
   <meta charset="utf-8">
   <style>
     @import url("/lib/highlight/styles/github.css?20160106");
+    body {
+      background-color: #f2f2f2;
+    }
+    pre, code, .hljs {
+      margin: 0;
+      padding: 0;
+    }
+    #response {
+      background-color: #fff;
+      border: 1px solid #DEDEDE;
+      padding: 10px;
+    }
+    .alert {
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #fff;
+      border: 1px solid #DEDEDE;
+    }
+    .alert.danger {
+      color: #a94442;
+      border-left: 3px solid #a94442;
+    }
   </style>
   <script src="/lib/highlight/highlight.pack.js"></script> <!--https://highlightjs.org/-->
 </head>
 <body>
+  <article id="alert" class="alert danger" style='display:none'></article>
   <article id="response">Loading...</article>
 
 <script>
@@ -15,45 +38,66 @@
 
 var LKTutorials = window.parent.LKTutorials;
 
+function setResult(content) {
+  var preElt = document.createElement('pre');
+  var codeElt = document.createElement('code');
+
+  codeElt.textContent = (content !== '') ? content : 'No Content';
+  hljs.highlightBlock(codeElt);
+  preElt.appendChild(codeElt);
+  document.getElementById('response').replaceChild(
+    preElt,
+    document.getElementById('response').firstChild
+  );
+}
+
 function test(xhr, response) {
   var answer = (response !== undefined) ? response : xhr;
+  var content = 'No Content';
 
-  var content = JSON.stringify(answer, null, '  '); // indent with 2 space blocks
-
-  function setResult(content) {
-    content = (answer !== '') ? content : 'No Content';
-    var preElt = document.createElement('pre');
-    var codeElt = document.createElement('code');
-    codeElt.textContent = content;
-    hljs.highlightBlock(codeElt);
-    preElt.appendChild(codeElt);
-    document.getElementById('response').replaceChild(
-      preElt,
-      document.getElementById('response').firstChild
-    );
+  if (answer !== '') {
+    // Indent with 2 space blocks
+    content = JSON.stringify(answer, null, '  ');
   }
 
   validate(answer).then(function() {
     setResult(content);
     LKTutorials.onResultSuccess();
   })
-  .catch(function() {
+  .catch(function(e) {
     setResult(content);
+    if (e && e.length) {
+      document.getElementById('alert').style.display = '';
+      document.getElementById('alert').textContent = e;
+    }
+
     LKTutorials.onResultError();
   });
 }
 
 function error(e, xhr, response) {
-  document.getElementById('response').textContent = e;
+  if (e && e.length) {
+    document.getElementById('alert').style.display = '';
+    document.getElementById('alert').textContent = e;
+
+    if(xhr !== undefined) {
+      document.getElementById('alert').textContent += ' ' + xhr.responseURL;
+      var content = JSON.stringify(response, null, '  '); // indent with 2 space blocks
+      setResult(content);
+    }
+  }
   LKTutorials.onResultError();
 }
 
 function run(submittedCode) {
+  document.getElementById('alert').style.display = 'none';
   try {
     eval(submittedCode);
   } catch(e) {
     var msg = e.name + ': ' + e.message;
-    document.getElementById('response').textContent = msg;
+    document.getElementById('alert').style.display = '';
+    document.getElementById('alert').textContent = msg;
+    document.getElementById('response').textContent = '';
     LKTutorials.onResultError();
   }
 }

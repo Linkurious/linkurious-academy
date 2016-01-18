@@ -26,7 +26,7 @@
       }, {
         "title": "Log in",
         "id": "log-in",
-        "next": "datasource-status"
+        "next": "log-out"
       }, {
         "title": "Log out",
         "id": "log-out"
@@ -36,7 +36,14 @@
   {
     "title": "Open user interface",
     "id": "open-ui",
+    "next": "search-display-inapp",
     "exercises": [
+      {
+        "title": "Introduction",
+        "id": "intro",
+        "next": "one-node",
+        "textOnly": true
+      },
       {
         "title": "Open with a single node",
         "id": "one-node",
@@ -60,6 +67,22 @@
       {
         "title": "Open with a graph query",
         "id": "graph-query"
+      }
+    ]
+  },
+  {
+    "title": "Search and display in app",
+    "id": "search-display-inapp",
+    "exercises": [
+      {
+        "title": "Introduction",
+        "id": "intro",
+        "next": "search-nodes",
+        "textOnly": true
+      },
+      {
+        "title": "Search nodes",
+        "id": "search-nodes"
       }
     ]
   }
