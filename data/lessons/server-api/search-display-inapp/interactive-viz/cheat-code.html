@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: 'Helvetica';
+    }
+    a {
+      color: #EA5565;
+      text-decoration: none;
+    }
+    a:hover,
+    a:active {
+      color: #EA5565;
+      background: #141229;
+    }
+    #sidebar {
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 278px;
+      position: fixed;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: #1E1D32;
+      color: #fff;
+    }
+    #sidebar > div {
+      margin: 30px 0;
+    }
+    #search-container {
+      padding: 10px;
+    }
+    #search-input {
+      width: 100%;
+    }
+    #search-results ul,
+    #search-results li {
+      padding: 0;
+    }
+    #search-results li > a {
+      padding: 10px;
+      display: block;
+    }
+    #search-results strong {
+      padding: 0 10px;
+    }
+    #graph-container {
+      top: 0;
+      bottom: 0;
+      left: 300px;
+      right: 0;
+      position: absolute;
+    }
+    #instructions {
+      font-size: 13px;
+      margin-top: 0!important;
+      padding: 10px;
+      background: #141229;
+    }
+    .highlight {
+      text-decoration: underline;
+    }
+    .noselect {
+      /* http://stackoverflow.com/a/4407335/738167 */
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+  </style>
+  <script src="/node_modules/qwest/qwest.min.js"></script>
+  <script src="https://rawgit.com/Linkurious/linkurious.js/develop/dist/sigma.min.js"></script>
+  <script src="https://rawgit.com/Linkurious/linkurious.js/develop/dist/plugins.min.js"></script>
+</head>
+<body>
+  <section id="sidebar" class="noselect">
+    <div id="instructions">Start searching nodes, select a result, then double-click on the displayed nodes to expand their connections. Enjoy the end of this tutorial!</div>
+    <div id="search-container">
+      Search Linkurious:
+      <input id="search-input" type="search" name="graphsearch" value="energy">
+    </div>
+    <div id="search-results"></div>
+  </section>
+  <section id="graph-container"></section>
+
+<script>
+'use strict';
+
+var BASE_URL = 'http://localhost:3000/';
+
+var searchInputElt = document.getElementById('search-input');
+var searchResultsElt = document.getElementById('search-results');
+
+var sigmaInstance,
+  layoutPlugin,
+  locatePlugin,
+  source,
+  qwestOpts = { cache: true, withCredentials: true };
+
+
+/**
+ * Search nodes using the Linkurious API. Results are displayed in the sidebar.
+ *
+ * @param {string} queryString
+ */
+function searchNodes(queryString) {
+  if (queryString === undefined || queryString === '') {
+    searchResultsElt.innerHTML = 'Start typing in the search bar above.';
+    return;
+  }
+
+  var url = BASE_URL + 'api/' + source.key + '/search/nodes';
+
+  qwest.get(url, {
+    q: queryString,
+    fuzziness: 0.6,
+    size: 10 // maximum number of results wanted
+  }, qwestOpts)
+
+  .then(function(xhr, response) {
+    if (response && response.totalHits > 0) {
+
+      var res = [];
+
+      response.results.forEach(function(group) {
+        if (!group.children || group.children.length == 0) return;
+
+        res.push('<strong>' + group.title + '</strong><ul>');
+
+        group.children.forEach(function(hit) {
+          hit.value = hit.value.replace('[match]', '<span class="highlight">');
+          hit.value = hit.value.replace('[/match]', '</span>');
+
+          var item = [
+            '<li><a onclick="updateVisualization(', hit.id, ', true)" href="#">',
+            hit.name,
+            '<br /><small>', hit.field, ': ', hit.value, '</small>',
+            '</a></li>'
+          ];
+          res.push.apply(res, item);
+        });
+        res.push('</ul>');
+      });
+
+      searchResultsElt.innerHTML = res.join('');
+
+    }
+    else {
+      searchResultsElt.textContent = 'No results found.';
+    }
+  })
+
+  .catch(function(e) {
+    throw e;
+  });
+}
+
+/**
+ * Get the neighborhood of a specified node.
+ *
+ * @param {string|number} nodeId The node ID.
+ * @return Promise
+ */
+function getNodeNeighborhood(nodeId) {
+  var url = BASE_URL + 'api/' + source.key + '/graph/nodes/expand';
+
+  return qwest.post(url, {
+    ids: [ nodeId ],
+    limit: 50,  // maximum number of nodes to return
+    limitType: 'highestDegree' // return the most connected nodes
+  }, qwestOpts);
+}
+
+/**
+ * Format the response of a neighborhood query
+ * into an object to be read by sigma.
+ *
+ * @param  {object} response The query response.
+ * @return {object} graph The graph data.
+ */
+function formatNeighborhood(response) {
+  var graph = { nodes: [], edges: [] };
+
+  var edgeIds = {};
+
+  response.forEach(function(node) {
+    // Add nodes with random coordinates
+    graph.nodes.push({
+      id: node.id,
+      label: node.data.name, // specific to the data source
+      data: node.data,
+      categories: node.categories,
+      x: Math.random(),
+      y: Math.random(),
+      size: 1
+    });
+
+    // Add edges without duplicates
+    node.edges
+      .filter(function(edge) {
+        return !edgeIds[edge.id];
+      })
+      .forEach(function(edge) {
+        edgeIds[edge.id] = true;
+        graph.edges.push(edge);
+      });
+  });
+
+  return graph;
+}
+
+/**
+ * Open the visualization of a local view of the graph.
+ *
+ * @param {string|number} nodeId The node ID.
+ * @param {boolean} clearGraph The graph is cleared if true.
+ */
+function updateVisualization(nodeId, clearGraph) {
+  getNodeNeighborhood(nodeId).then(function(xhr, response) {
+    var graph = formatNeighborhood(response);
+
+    // Update the visualization
+    if (clearGraph) {
+      sigmaInstance.graph.clear();
+    }
+    graph.nodes.forEach(function(node) {
+      if (!sigmaInstance.graph.nodes(node.id)) {
+        sigmaInstance.graph.addNode(node);
+      }
+    });
+    graph.edges.forEach(function(edge) {
+      if (!sigmaInstance.graph.edges(edge.id)) {
+        sigmaInstance.graph.addEdge(edge);
+      }
+    });
+    sigmaInstance.refresh();
+
+    // Start the ForceLink algorithm
+    sigma.layouts.startForceLink();
+  })
+
+  .catch(function(e) {
+    throw e;
+  });
+}
+
+
+// Instantiate sigma
+sigmaInstance = new sigma({
+  container: 'graph-container',
+  settings: {
+    autoRescale: ['nodeSize', 'edgeSize'],
+    nodesPowRatio: 0.8,
+    edgesPowRatio: 0.8,
+    minNodeSize: 5,
+    maxNodeSize: 5,
+    minEdgeSize: 2,
+    maxEdgeSize: 2,
+    zoomMin: 0.1,
+    zoomMax: 5,
+    zoomingRatio: 1.382,
+    doubleClickZoomingRatio: 1,
+    doubleClickZoomDuration: 0,
+    doubleClickEnabled: false,
+    animationsTime: 800,
+    // Labels:
+    font: 'Helvetica',
+    labelAlignment: 'center',
+    labelThreshold: 5,
+    labelHoverShadow: '',
+    // Nodes:
+    defaultNodeColor: '#a9a9a9',
+    // Edges:
+    edgeColor: 'default',
+    defaultEdgeColor: '#a9a9a9',
+    // Node border
+    hoverFontStyle: 'bold',
+    borderSize: 2,
+    outerBorderSize: 4,
+    nodeBorderColor: 'default',
+    defaultNodeBorderColor: '#ffffff',
+    defaultNodeOuterBorderColor: '#f65565',
+  }
+});
+
+// Configure the ForceLink layout algorithm
+layoutPlugin = sigma.layouts.configForceLink(sigmaInstance, {
+  worker: true,
+  autoStop: true,
+  background: true,
+  scalingRatio: 10,
+  easing: 'cubicInOut'
+});
+
+layoutPlugin.bind('stop', function() {
+  var allNodeIds = sigmaInstance.graph.nodes().map(function(node) {
+    return node.id;
+  });
+  locatePlugin.nodes(allNodeIds);
+});
+
+// Instantiate the locate plugin
+locatePlugin = sigma.plugins.locate(sigmaInstance);
+
+sigmaInstance.bind('doubleClickNode', function(e) {
+  updateVisualization(e.data.node.id);
+});
+
+// Enable live search results
+searchInputElt.addEventListener('input', function(e) {
+  searchNodes(e.srcElement.value)
+}, false);
+
+
+// Authenticate user
+qwest.post(BASE_URL + 'api/auth/login', {
+  usernameOrEmail: 'Student 0',
+  password: 'student0',
+}, qwestOpts)
+
+// Discover datasources
+.then(function() {
+  return qwest.get(BASE_URL + 'api/dataSources', null, qwestOpts);
+})
+
+// Save source
+.then(function(xhr, response) {
+  // Pick first datasource
+  source = response.sources[0];
+
+  if (!source) {
+    throw 'No data source unavailable';
+  }
+  if (!source.connected) {
+    throw 'Data source is offline';
+  }
+  if (source.state !== 'ready') {
+    throw 'Data source is not ready, status is ' + source.state;
+  }
+
+  searchNodes(searchInputElt.value);
+})
+
+.catch(function(e) {
+  throw e;
+});
+
+</script>
+</body>
+</html>

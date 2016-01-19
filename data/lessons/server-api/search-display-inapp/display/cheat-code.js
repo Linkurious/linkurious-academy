@@ -43,7 +43,7 @@ qwest.post(BASE_URL + 'api/auth/login', {
 
     return qwest.post(url, {
       ids: [ nodeId ],
-      limit: 5,  // maximum number of nodes to return
+      limit: 50,  // maximum number of nodes to return
       limitType: 'highestDegree' // return the most connected nodes
     }, qwestOpts);
   }
@@ -57,11 +57,15 @@ qwest.post(BASE_URL + 'api/auth/login', {
   var edgeIds = {};
 
   response.forEach(function(node) {
-    // Add nodes without extra keys
+    // Add nodes with random coordinates
     graph.nodes.push({
       id: node.id,
+      label: node.data.name, // specific to the data source
       data: node.data,
-      categories: node.categories
+      categories: node.categories,
+      x: Math.random(),
+      y: Math.random(),
+      size: 1
     });
 
     // Add edges without duplicates
@@ -75,7 +79,20 @@ qwest.post(BASE_URL + 'api/auth/login', {
       });
   });
 
-  return graph;
+  // Create a container for the visualization
+  var graphContainerElt = document.createElement('div');
+  graphContainerElt.id = 'graph-container';
+  document.body.insertBefore(graphContainerElt, document.getElementById('response'));
+
+  // Instantiate sigma
+  var sigmaInstance = new sigma({
+    graph: graph,
+    container: 'graph-container'
+  });
+
+  sigmaInstance.bind('clickNode', function(e) {
+    document.getElementById('response').textContent = JSON.stringify(e.data.node.data);
+  });
 })
 
 .then(test)

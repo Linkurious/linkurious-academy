@@ -25,10 +25,11 @@ qwest.post(BASE_URL + 'api/auth/login', {
   source = response.sources[0];
 
   if (source && source.connected && source.state == 'ready') {
-    var url = BASE_URL + 'api/' + source.key + '<EDIT_HERE>';
+    var url = BASE_URL + 'api/' + source.key + '/search/nodes';
     return qwest.get(url, {
       q: queryString,
-      fuzziness: 0.6
+      fuzziness: 0.6,
+      size: 10 // maximum number of results wanted
     }, qwestOpts);
   }
   throw 'Source unavailable';
