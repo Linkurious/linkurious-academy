@@ -1,6 +1,8 @@
 <p>In this tutorial you will learn how to create a mini web interface for users to search nodes, select a result, and to display its connections in the same page.</p>
 
-<p>We will first use the Search API of the Linkurious server to provide instant results. Once the end user selects a result, we will query the Graph API get its information and its neighborhood, i.e. its connected nodes and the relationships between those nodes. We will then display the subgraph with the linkurious.js Javascript library. As an exercise bonus, we will finally allow users to expand a node's connections by double-click on it in the visualization.</p>
+<p>We will first use the Search API of the Linkurious server to provide instant results. Once the end user selects a result, we will query the Graph API get its information and its neighborhood, i.e. its connected nodes and the relationships between those nodes. We will then display the graph with the linkurious.js Javascript library. As an exercise bonus, we will finally allow users to expand a node's connections by double-click on it in the visualization.</p>
+
+<p>The architecture is described in the image below. a web client will query the Linkurious server to search nodes and get graph data. It will finally display the graph, and the user can interact with the visualization.</p>
 
 <img src="/data/lessons/server-api/search-display-inapp/intro/architecture.png" width="600" />
 

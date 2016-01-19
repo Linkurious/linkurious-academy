@@ -82,7 +82,17 @@
       },
       {
         "title": "Search nodes",
-        "id": "search-nodes"
+        "id": "search-nodes",
+        "next": "get-node"
+      },
+      {
+        "title": "Get node from search results",
+        "id": "get-node",
+        "next": "get-node-neighborhood"
+      },
+      {
+        "title": "Get node neighborhood",
+        "id": "get-node-neighborhood"
       }
     ]
   }
