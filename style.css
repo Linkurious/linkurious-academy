@@ -263,8 +263,8 @@ nav > ul,
 }
 
 ::-webkit-scrollbar {
-  width: 3px;
-  height: 3px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-button {
   width: 0px;
@@ -276,10 +276,10 @@ nav > ul,
   border-radius: 50px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #000000;
+  background: #EA5565;
 }
 ::-webkit-scrollbar-thumb:active {
-  background: #000000;
+  background: #EA5565;
 }
 ::-webkit-scrollbar-track {
   background: #DEDEDE;

@@ -1,8 +1,8 @@
-var BASE_URL = 'http://crunchbase.linkurio.us/';
+var BASE_URL = 'http://localhost:3000/';
 
 var query = '<EDIT_HERE>';
-var type = 'node'; // 'node' or 'edge'
-var fuzziness = 0.6; // 0..1
+var populate = 'searchNodes'; // 'searchNodes' or 'searchEdges'
+var fuzziness = 0.6; // range: 0..1
 
 qwest.get(BASE_URL + 'api/dataSources', null, {
   cache: true
@@ -12,9 +12,9 @@ qwest.get(BASE_URL + 'api/dataSources', null, {
   if (source && source.connected && source.state == 'ready') {
     window.open(BASE_URL + 'workspace/new' +
       '?source=' + source.key +
-      '&populate_type=' + type +
-      '&populate_query=' + query +
-      '&query_fuzziness=' + fuzziness
+      '&populate=' + populate +
+      '&search_query=' + query +
+      '&search_fuzziness=' + fuzziness
     );
   }
 })

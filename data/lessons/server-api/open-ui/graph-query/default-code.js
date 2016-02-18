@@ -1,6 +1,22 @@
-var BASE_URL = 'http://crunchbase.linkurio.us/';
+var BASE_URL = 'http://localhost:3000/';
 
-var nodeId = 42;
+var query = '<EDIT_HERE>';
+var populate = 'pattern';
+var dialect = 'cypher' // 'cypher' for Neo4j or 'gremlin' for TitanDB
 
-window.open(BASE_URL + 'workspace/new?populate_type=node&populate_id=' + nodeId);
-test();
+qwest.get(BASE_URL + 'api/dataSources', null, {
+  cache: true
+})
+.then(function(xhr, response) {
+  var source = response.sources[0]; // pick first datasource
+  if (source && source.connected && source.state == 'ready') {
+    window.open(BASE_URL + 'workspace/new' +
+      '?source=' + source.key +
+      '&populate=' + populate +
+      '&pattern_query=' + query +
+      '&pattern_dialect=' + dialect
+    );
+  }
+})
+.then(test)
+.catch(error);

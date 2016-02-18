@@ -41,8 +41,7 @@
       {
         "title": "Introduction",
         "id": "intro",
-        "next": "one-node",
-        "textOnly": true
+        "next": "one-node"
       },
       {
         "title": "Open with a single node",
@@ -77,8 +76,7 @@
       {
         "title": "Introduction",
         "id": "intro",
-        "next": "search-nodes",
-        "textOnly": true
+        "next": "search-nodes"
       },
       {
         "title": "Search nodes",
@@ -102,7 +100,8 @@
       },
       {
         "title": "Interactive visualization",
-        "id": "interactive-viz"
+        "id": "interactive-viz",
+        "language": "html"
       }
     ]
   }

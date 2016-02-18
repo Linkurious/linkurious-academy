@@ -1,6 +1,6 @@
-var BASE_URL = 'http://crunchbase.linkurio.us/';
+var BASE_URL = 'http://localhost:3000/';
 
 var nodeId = 42;
 
-window.open(BASE_URL + 'workspace/new?populate_type=node&populate_id=' + nodeId);
+window.open(BASE_URL + 'workspace/new?populate=nodeId&item_id=' + nodeId);
 test();

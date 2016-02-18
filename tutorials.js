@@ -6,7 +6,7 @@ var LKTutorials = {};
 
   var
     _ROOT = '/data/',
-    _VERSION = '?v=20160113',
+    _VERSION = '?r=' + Date.now(),
 
     _lessons = {},
     _units = [],
@@ -132,9 +132,9 @@ var LKTutorials = {};
       unitId: unitId,
       id: exerciseId,
       ueid: ueid,
-      textOnly: !!_exercisesIndex[ueid].textOnly,
       title: _exercisesIndex[ueid].title,
       path: exercisePath(lessonId, unitId, exerciseId),
+      language: _exercisesIndex[ueid].language || 'js',
       defaultCode: null,
       cheatCode: null,
       validationCode: null,
@@ -142,22 +142,6 @@ var LKTutorials = {};
     };
 
     setPageTitle(lessonId, unitId, exerciseId);
-
-    if (_curExercise.textOnly) {
-      document.getElementById('code').style.display = 'none';
-      document.getElementById('run-btn').style.display = 'none';
-      document.getElementById('cheat-btn').style.display = 'none';
-      document.getElementById('reset-btn').style.display = 'none';
-      document.getElementById('next-btn').disabled = '';
-
-      return httpGetAsync(exercisePath(lessonId, unitId, exerciseId) + 'instructions.html')
-      .then(function(res) {
-        document.getElementById('instructions').innerHTML = res;
-      })
-      .catch(function(err) {
-        notify('Instructions ' + err.statusText, 'danger');
-      });
-    }
 
     document.getElementById('code').style.display = '';
     document.getElementById('run-btn').style.display = '';
@@ -174,26 +158,44 @@ var LKTutorials = {};
         notify('Instructions ' + err.statusText, 'danger');
       }),
 
-      httpGetAsync(exercisePath(lessonId, unitId, exerciseId) + 'default-code.js').then(function(res) {
+      httpGetAsync(exercisePath(lessonId, unitId, exerciseId) + 'default-code.' + _curExercise.language)
+      .then(function(res) {
         _curExercise.defaultCode = res;
+
+        var lang = _curExercise.language;
+        if (lang == 'js') lang = 'javascript';
 
         _codeMirror = _codeMirror || CodeMirror(document.getElementById('code'), {
           lineNumbers: true,
-          mode: 'javascript'
+          mode: lang
         });
         _codeMirror.setValue(res);
         _codeMirror.focus();
 
       })
       .catch(function(err) {
-        notify('Default code ' + err.statusText, 'danger');
+        document.getElementById('code').style.display = 'none';
+        document.getElementById('run-btn').style.display = 'none';
+        document.getElementById('reset-btn').style.display = 'none';
+        document.getElementById('next-btn').disabled = '';
       }),
 
-      httpGetAsync(exercisePath(lessonId, unitId, exerciseId) + 'cheat-code.js').then(function(res) {
+      httpGetAsync(exercisePath(lessonId, unitId, exerciseId) + 'cheat-code.' + _curExercise.language)
+      .then(function(res) {
         _curExercise.cheatCode = res;
       })
       .catch(function(err) {
-        notify('Cheat code ' + err.statusText, 'danger');
+        document.getElementById('cheat-btn').style.display = 'none';
+      }),
+
+      httpGetAsync(exercisePath(_curExercise.lessonId, _curExercise.unitId, _curExercise.id) + 'validation-code.js')
+      .then(function(res) {
+        _curExercise.validationCode = res;
+      })
+      .catch(function(err) {
+        document.getElementById('run-btn').style.display = 'none';
+        document.getElementById('reset-btn').style.display = 'none';
+        document.getElementById('next-btn').disabled = '';
       }),
 
       httpGetAsync(lessonPath(lessonId) + 'result.html').then(function(res) {
@@ -225,15 +227,10 @@ var LKTutorials = {};
   LKTutorials.onResultFrameReady = function() {
     _iframeElt.contentWindow.Promise = Promise;
     _iframeElt.contentWindow.qwest = qwest;
-    httpGetAsync(exercisePath(_curExercise.lessonId, _curExercise.unitId, _curExercise.id) + 'validation-code.js')
-    .then(function(res) {
-      _curExercise.validationCode = res;
+    if (_curExercise.validationCode) {
       _iframeElt.contentWindow.eval(_curExercise.validationCode);
       _iframeElt.contentWindow.run(_codeMirror.getValue());
-    })
-    .catch(function(err) {
-      notify('Validation code ' + err.statusText, 'danger');
-    });
+    }
   };
 
   LKTutorials.onResultSuccess = function() {
