@@ -72,6 +72,7 @@
   {
     "title": "Search and display in app",
     "id": "search-display-inapp",
+    "next": "embed-widgets",
     "exercises": [
       {
         "title": "Introduction",
@@ -101,6 +102,37 @@
       {
         "title": "Interactive visualization",
         "id": "interactive-viz",
+        "language": "html"
+      }
+    ]
+  },
+  {
+    "title": "Embed widgets",
+    "id": "embed-widgets",
+    "exercises": [
+      {
+        "title": "Introduction",
+        "id": "intro",
+        "next": "query-graph"
+      },
+      {
+        "title": "Query the graph",
+        "id": "query-graph",
+        "next": "create-viz"
+      },
+      {
+        "title": "Create a visualization",
+        "id": "create-viz",
+        "next": "create-widget"
+      },
+      {
+        "title": "Create a widget",
+        "id": "create-widget",
+        "next": "get-widget"
+      },
+      {
+        "title": "Embed the widget in app",
+        "id": "embed-widget",
         "language": "html"
       }
     ]

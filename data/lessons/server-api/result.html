@@ -82,6 +82,7 @@ function test(xhr, response) {
 }
 
 function error(e, xhr, response) {
+  console.log('error', e, response);
   if (e && e.length) {
     document.getElementById('alert').style.display = '';
     document.getElementById('alert').textContent = e;
