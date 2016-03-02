@@ -16,7 +16,9 @@ node_modules/qwest/*
 node_modules/codemirror/addon
 node_modules/codemirror/bin
 node_modules/codemirror/keymap
-node_modules/codemirror/mode
+node_modules/codemirror/mode/*
+!node_modules/codemirror/mode/javascript
+!node_modules/codemirror/mode/xml
 node_modules/codemirror/theme
 node_modules/codemirror/*.md
 node_modules/codemirror/*.json
