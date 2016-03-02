@@ -28,7 +28,7 @@ qwest.post(BASE_URL + 'api/auth/login', {
   if (source && source.connected && source.state == 'ready') {
     var url = BASE_URL + 'api/' + source.key + '/graph/rawQuery';
     return qwest.post(url, {
-      query: queryString,
+      query: encodeURIComponent(queryString),
       dialect: 'cypher'
     }, qwestOpts);
   }

@@ -13,7 +13,7 @@ qwest.get(BASE_URL + 'api/dataSources', null, {
     window.open(BASE_URL + 'workspace/new' +
       '?source=' + source.key +
       '&populate=' + populate +
-      '&pattern_query=' + query +
+      '&pattern_query=' + encodeURIComponent(query) +
       '&pattern_dialect=' + dialect
     );
   }

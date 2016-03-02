@@ -130,7 +130,7 @@ function searchNodes(queryString) {
   var url = BASE_URL + 'api/' + source.key + '/search/nodes';
 
   qwest.get(url, {
-    q: queryString,
+    q: encodeURIComponent(queryString),
     fuzziness: 0.6,
     size: 10 // maximum number of results wanted
   }, qwestOpts)
