@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <link rel="shortcut icon" href="resources/favicon.ico">
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
+  <style>
+    @import url("node_modules/codemirror/lib/codemirror.css");
+    @import url("style.css?20120730");
+  </style>
+  <script src="node_modules/qwest/qwest.min.js"></script>
+  <script src="node_modules/bluebird/js/browser/bluebird.min.js"></script>
+  <script src="node_modules/codemirror/lib/codemirror.js"></script>
+  <script src="node_modules/codemirror/mode/javascript/javascript.js"></script>
+  <script src="node_modules/codemirror/mode/xml/xml.js"></script>
+  <script src="tutorials.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <strong>Platform</strong> <img src="resources/logo-linkurious.png" alt="Linkurious" height="12" />
+    </div>
+    <nav>
+      <ul>
+        <li><a href="" class="active">Overview</a></li>
+        <li><a href="tutorials.html">Tutorials</a></li>
+        <li><a href="http://linkurio.us/docs/api/" target="_blank">API</a></li>
+        <li><a href="https://linkurio.us/contact/" target="_blank">Support</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div id="main-content">
+    <section>
+      <h1 id="title">Architecture overview</h1>
+      <article id="overview">
+        <img src="resources/lke-technical-diagram.svg" alt="Architecture diagram">
+        <div>
+        <p>
+          Linkurious Enterprise is the sum of two components:
+          </p><ul>
+            <li>
+              the Web client, whichs runs in a browser and provides users with a graphical interface to
+              explore graphs visually;
+            </li>
+            <li>
+              the platform, which is a middleware server application that provides REST services to
+              search and browse graphs, edit graph data, build and share visualizations.
+            </li>
+          </ul>
+          The platform contains:
+          <ul>
+            <li>a graph module, which enables graph data access and edition;</li>
+            <li>
+                a search module,  which enables advanced search in graph nodes and relationships data;
+            </li>
+            <li>
+               an access module, which enables managing and applying data-access and data-edition
+               restictions to user groups;
+            </li>
+            <li>
+                a persistence module, to save visualizations and other items to disk .
+            </li>
+          </ul>
+        <p></p>
+      </div>
+      <div>
+        <p>
+          The Linkurious Enterprise platform communicates with your Neo4j graph database and your ElasticSearch
+          index (existing in your infrastructure, or built-in) through HTTP APIs: each
+          components may run on different computers on your network.
+        </p>
+        <p>
+            Linkurious Enterprise is based on Open Source technology:
+            </p><ul>
+                <li>
+                    the platform is built on top of <a href="http://nodejs.org/" target="_blank">Node.js</a>
+                    to enable high performance on any modern Linux, Mac or Windows computer;
+                </li>
+                <li>
+                    the platform's search module uses
+                    <a href="https://www.elastic.co/products/elasticsearch" target="_blank">ElasticSearch</a>
+                    for real-time full-text search in nodes and relationships;
+                </li>
+                <li>
+                    the platform's persistence module uses
+                    <a href="http://docs.sequelizejs.com/en/latest/" target="_blank">SequelizeJS</a>
+                    to enable persistence to
+                    <a href="https://sqlite.org/" target="_blank">SQLite</a>,
+                    <a href="https://www.mysql.fr/" target="_blank">MySQL</a>
+                    or <a href="http://www.postgresql.org/" target="_blank">PostgreSQL</a>
+                    with minimal configuration;
+                </li>
+                <li>
+                    the client is built using <a href="https://angularjs.org/" target="_blank">AngularJS</a>
+                    for a smooth cross-browser user experience;
+                </li>
+                <li>
+                    the client's interactive visualizations are powered by <a href="https://linkurio.us/toolkit/">Linkurious.js</a>
+                    for high performances and advanced interactions with graphs in the browser.
+                </li>
+            </ul>
+        <p></p>
+      </div>
+      </article>
+      <!--footer><a href="#">Back to top.</a></footer-->
+    </section>
+  </div>
+
+  <nav id="left-sidebar">
+  </nav>
+  <div style="clear: both;"></div>
+</body>
+</html>
