@@ -5,7 +5,7 @@ var LKTutorials = {};
 (function (window) {
 
   var
-    _ROOT = '/data/',
+    _ROOT = './data/',
     _VERSION = '?r=' + Date.now(),
 
     _lessons = {},
