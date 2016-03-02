@@ -1,4 +1,4 @@
-var BASE_URL = 'http://localhost:3000/';
+var BASE_URL = 'http://crunchbase.linkurio.us/';
 
 var queryString  = 'MATCH (n1)-[r]-(n2) RETURN n1,r,n2 LIMIT 5';
 var source;

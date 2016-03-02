@@ -56,7 +56,7 @@
       {
         "title": "Open with node connections",
         "id": "one-node-neighborhood",
-        "next": "one-node-neighborhood"
+        "next": "search-query"
       },
       {
         "title": "Open with a search query",
@@ -128,7 +128,7 @@
       {
         "title": "Create a widget",
         "id": "create-widget",
-        "next": "get-widget"
+        "next": "embed-widget"
       },
       {
         "title": "Embed the widget in app",
