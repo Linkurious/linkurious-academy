@@ -34,6 +34,9 @@ var LKTutorials = {};
           LKTutorials.loadExercise(lessonId, _units[0].id, _units[0].exercises[0].id);
         }
       });
+    })
+    .catch(function(err) {
+      LKTutorials.loadHome();
     });
 
     _iframeContainerElt = document.getElementById('output-container');
@@ -42,6 +45,17 @@ var LKTutorials = {};
     if (exerciseId !== undefined) {
       setPageTitle(lessonId, unitId, exerciseId);
     }
+  };
+
+  LKTutorials.loadHome = function() {
+    document.getElementById('title').textContent = 'Available lessons';
+    document.getElementById('instructions').innerHTML = '<ul><li><a href="?lesson=server-api">Server API</a></li></ul>';
+
+    document.getElementById('code').style.display = 'none';
+    document.getElementById('run-btn').style.display = 'none';
+    document.getElementById('cheat-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.getElementById('next-btn').style.display = 'none';
   };
 
   LKTutorials.loadLessons = function() {
@@ -105,6 +119,7 @@ var LKTutorials = {};
     // Reset UI
     resetNotifications();
     _iframeContainerElt.style.display = 'none';
+    document.getElementById('next-btn').style.display = '';
     document.getElementById('next-btn').disabled = 'disabled';
     document.getElementById('validation-output').textContent = '';
     document.getElementById('instructions').innerHTML = '';
