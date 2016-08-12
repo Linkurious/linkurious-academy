@@ -122,7 +122,8 @@ qwest.post(BASE_URL + 'api/auth/login', {
         scheme: "nodes.sequential",
         active: true
       }
-    }
+    },
+    edges: {}
   };
 
   var url = BASE_URL + 'api/' + source.key + '/visualizations';
