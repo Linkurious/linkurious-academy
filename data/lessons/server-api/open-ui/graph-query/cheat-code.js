@@ -1,6 +1,6 @@
 var BASE_URL = 'http://crunchbase.linkurio.us/';
 
-var query = 'MATCH n RETURN n LIMIT 5';
+var query = 'MATCH (n)-[r]-(m) RETURN n,r,m LIMIT 5';
 var populate = 'pattern';
 var dialect = 'cypher' // 'cypher' for Neo4j or 'gremlin' for TitanDB
 
