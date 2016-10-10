@@ -146,12 +146,6 @@ qwest.post(BASE_URL + 'api/auth/login', {
   var options = {
     visualization_id: response.visualization.id,
     content: {
-      graph: {
-        nodes: graphData.nodes,
-        edges: graphData.edges
-      },
-      palette: configuration.palette,
-      styles: styles,
       ui: {
         search: true,
         share: false,
