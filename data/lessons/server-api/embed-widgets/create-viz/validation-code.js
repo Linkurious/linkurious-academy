@@ -1,9 +1,8 @@
 function validate(answer) {
-  return new Promise(function(resolve, reject) {
-    if (answer !== undefined && answer.visualization) {
-      resolve();
-    }
-    else if (!answer) reject('Empty result');
-    else reject();
-  });
+  if (!answer) {
+    return Promise.reject('Empty result');
+  }
+  if (!answer.visualization) {
+    return Promise.reject('"visualization" field not found in response');
+  }
 }

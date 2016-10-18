@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <style>
-    @import url("/lib/highlight/styles/github.css?20160106");
+    @import url("/linkurious-academy/lib/highlight/styles/github.css?20160106");
     body {
       background-color: #f2f2f2;
     }
@@ -32,7 +32,7 @@
       border-left: 3px solid #a94442;
     }
   </style>
-  <script src="/lib/highlight/highlight.pack.js"></script> <!--https://highlightjs.org/-->
+  <script src="/linkurious-academy/lib/highlight/highlight.pack.js"></script> <!--https://highlightjs.org/-->
   <script src="https://rawgit.com/Linkurious/linkurious.js/develop/dist/sigma.min.js"></script>
 </head>
 <body>
@@ -66,11 +66,12 @@ function test(xhr, response) {
     content = JSON.stringify(answer, null, '  ');
   }
 
-  validate(answer).then(function() {
+  Promise.resolve().then(function()  {
+    return validate(answer);
+  }).then(function() {
     setResult(content);
     LKTutorials.onResultSuccess();
-  })
-  .catch(function(e) {
+  }).catch(function(e) {
     setResult(content);
     if (e && e.length) {
       document.getElementById('alert').style.display = '';

@@ -1,3 +1,4 @@
-var url = 'http://crunchbase.linkurio.us/api/<EDIT_HERE>';
+qwest.base = 'http://crunchbase.linkurio.us';
+qwest.setDefaultOptions({withCredentials: true});
 
-qwest.get(url, null, { cache: true }).then(test).catch(error);
+qwest.get('/api/<EDIT_HERE>').then(test).catch(error);

@@ -1,52 +1,40 @@
-var BASE_URL = 'http://crunchbase.linkurio.us/';
+qwest.base = 'http://crunchbase.linkurio.us';
+qwest.setDefaultOptions({withCredentials: true});
 
-var queryString  = 'energy';
+var searchQuery = 'energy';
 var source;
 
-var qwestOpts = {
-  cache: true,
-  withCredentials: true
-};
+// 1) Authenticate
+var loginData = {usernameOrEmail: 'Student 0', password: 'student0'};
+qwest.post('/api/auth/login', loginData).then(function() {
 
-// Authenticate user
-qwest.post(BASE_URL + 'api/auth/login', {
-  usernameOrEmail: 'Student 0',
-  password: 'student0',
-}, qwestOpts)
+  // 2) List data-sources
+  return qwest.get('/api/dataSources');
+}).then(function(xhr, response) {
 
-// Discover datasources
-.then(function() {
-  return qwest.get(BASE_URL + 'api/dataSources', null, qwestOpts);
-})
-
-// Search nodes
-.then(function(xhr, response) {
-  // Pick first datasource
+  // 3) Check that the first data-source is ready
   source = response.sources[0];
-
-  if (source && source.connected && source.state == 'ready') {
-    var url = BASE_URL + 'api/' + source.key + '/search/nodes';
-    return qwest.get(url, {
-      q: encodeURIComponent(queryString),
-      fuzziness: 0.6,
-      size: 10 // maximum number of results wanted
-    }, qwestOpts);
+  if (!source || !source.connected || source.state !== 'ready') {
+    throw 'Source unavailable';
   }
-  throw 'Source unavailable';
-})
 
-// Get a node from search results
-.then(function(xhr, response) {
-  if (response && response.totalHits && response.results[0].children.length) {
+  // 4) Search nodes matching [searchQuery] in the first data-source
+  return qwest.get('/api/' + source.key + '<EDIT_HERE>', {
+    q: searchQuery,
+    fuzziness: 0.6,
+    size: 10 // maximum number of results wanted
+  });
+}).then(function(xhr, response) {
 
-    // Pick first hit
-    var nodeId = response.results[0].children[0].id;
-
-    var url = BASE_URL + 'api/' + source.key + '/<EDIT_HERE>/' + nodeId;
-    return qwest.get(url, null, qwestOpts);
+  // 5) Check that there are matching nodes
+  if (!response || !response.totalHits || !response.results[0].children.length) {
+    throw 'No results found';
   }
-  throw 'No results found';
-})
 
-.then(test)
-.catch(error);
+  // 6) Load the first node
+  var nodeId = response.results[0].children[0].id;
+  return qwest.get('/api/' + source.key + '/graph/nodes/' + nodeId);
+})
+// the following callbacks validate your submission
+  .then(test)
+  .catch(error);

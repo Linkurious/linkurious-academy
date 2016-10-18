@@ -22,64 +22,54 @@
 <script>
 'use strict';
 
-var BASE_URL = 'http://crunchbase.linkurio.us/';
+var BASE_URL = 'http://crunchbase.linkurio.us';
+qwest.base = BASE_URL;
+qwest.setDefaultOptions({withCredentials: true, dataType: 'json'});
 
-var queryString  = 'MATCH (n1)-[r]-(n2) RETURN n1,r,n2 LIMIT 5';
+var cypherQuery  = 'MATCH (n1)-[r]-(n2) RETURN n1,r,n2 LIMIT 5';
 var source;
-var queryResponse;
-var graphData;
-var configuration;
-var styles;
+var cypherQueryResponse;
 
-var qwestOpts = {
-  cache: true,
-  withCredentials: true,
-  dataType: 'json'
-};
+// 1) Authenticate
+var loginData = {usernameOrEmail: 'Student 0', password: 'student0'};
+qwest.post('/api/auth/login', loginData).then(function() {
 
-// Authenticate user
-qwest.post(BASE_URL + 'api/auth/login', {
-  usernameOrEmail: 'Student 0',
-  password: 'student0',
-}, qwestOpts)
+  // 2) List data-sources
+  return qwest.get('/api/dataSources');
+}).then(function(xhr, response) {
 
-// Discover datasources
-.then(function() {
-  return qwest.get(BASE_URL + 'api/dataSources', null, qwestOpts);
-})
-
-// Send a Cypher query
-.then(function(xhr, response) {
-  // Pick first datasource
+  // 3) Check that the first data-source is ready
   source = response.sources[0];
-
-  if (source && source.connected && source.state == 'ready') {
-    var url = BASE_URL + 'api/' + source.key + '/graph/rawQuery';
-    return qwest.post(url, {
-      query: queryString,
-      dialect: 'cypher'
-    }, qwestOpts);
+  if (!source || !source.connected || source.state !== 'ready') {
+    throw 'Source unavailable';
   }
-  throw 'Source unavailable';
-})
 
-// Read configuration
-.then(function(xhr, response) {
-  queryResponse = response;
-  var url = BASE_URL + 'api/config?sourceIndex=' + source.configIndex;
-  return qwest.get(url, null, qwestOpts);
-})
+  // 4) Send a Cypher query
+  return qwest.post('/api/' + source.key + '/graph/rawQuery', {
+    query: cypherQuery,
+    dialect: 'cypher'
+  });
+}).then(function(xhr, response) {
+  cypherQueryResponse = response;
 
-// Create a visualization
-.then(function(xhr, response) {
-  configuration = response.config;
+  // 5) Read the default palette from the configuration
+  return qwest.get('/api/config', {sourceIndex: source.configIndex});
+}).then(function(xhr, response) {
+  var palette = response.config.palette;
 
-  var nodes = []; // visualization data
-  var edges = []; // visualization data
+  // 6) Build a visualization
+  var visualization = {
+    title: 'My visualization',
+    nodes: [],
+    edges: [],
+    design: { // apply default design config
+      palette: palette,
+      styles: undefined
+    }
+  };
   var edgeIndex = {}; // used to remove duplicates
-  graphData = { nodes: [], edges: [] }; // widget data
 
-  queryResponse.forEach(function(node) {
+  cypherQueryResponse.forEach(function(node) {
     if (node.edges && node.edges.length) {
       node.edges.forEach(function(edge) {
         if (!edgeIndex[edge.id]) {
@@ -97,108 +87,74 @@ qwest.post(BASE_URL + 'api/auth/login', {
           // Set the edge captions
           edge.label = edge.data.type;
 
-          edges.push({ id: edge.id });
-          graphData.edges.push(edge);
+          visualization.edges.push({id: edge.id});
+        } else {
+          edgeIndex[edge.id] = true;
         }
-        edgeIndex[edge.id] = true;
       });
     }
 
-    // Encapsulate the server node
-    node = {
-      id: node.id,
-      data: {
-        categories: node.categories,
-        properties: node.data,
-        statistics: node.statistics
-      }
-    };
-
-    // Fake node coordinates, we should apply a layout instead
+    // Random node coordinates: we should apply a layout instead
     node.x = Math.random() * 100;
     node.y = Math.random() * 100;
 
-    // Set the node captions
-    node.label = node.data.properties.name; // dataset specific
-
-    // Set the visualization styles
-    styles = {
-      nodes: {
-        size: {
-         by: "data.properties.funding_rounds",
-         bins: 7,
-         min: 5,
-         max: 9,
-         active: true
-        },
-        color: {
-          by: "data.properties.founded_year",
-          bins: 7,
-          scheme: "nodes.sequential",
-          active: true
-        }
-      },
-      edges: {}
-    };
-
-    nodes.push({
+    visualization.nodes.push({
       id: node.id,
       nodelink: {
         x: node.x,
         y: node.y
       }
     });
-    delete node.edges;
-    graphData.nodes.push(node);
   });
 
-  var url = BASE_URL + 'api/' + source.key + '/visualizations';
-  var options = {
-    title: 'My visualization',
-    nodes: nodes,
-    edges: edges,
-    design: { // apply default design config
-      palette: configuration.palette,
-      styles: styles
-    }
-  }
-
-  return qwest.post(url, options, qwestOpts);
-})
-
-// Create the visualization widget
-.then(function(xhr, response) {
-  var url = BASE_URL + 'api/widget';
-  var options = {
-    visualization_id: response.visualization.id,
-    content: {
-      ui: {
-        search: true,
-        share: false,
-        layout: true,
-        fullscreen: true,
-        zoom: true,
-        legend: true,
-        geo: false,
+  // 7) Set the visualization styles
+  visualization.design.styles = {
+    nodes: {
+      size: {
+        by: "data.properties.funding_rounds",
+        bins: 7,
+        min: 5,
+        max: 9,
+        active: true
+      },
+      color: {
+        by: "data.properties.founded_year",
+        bins: 7,
+        scheme: "nodes.sequential",
+        active: true
       }
-    }
+    },
+    edges: {}
   };
 
-  return qwest.post(url, options, qwestOpts);
-})
+  // 8) Save the visualization
+  return qwest.post('/api/' + source.key + '/visualizations', visualization);
+}).then(function(xhr, response) {
+  var visualizationId = response.visualization.id;
 
-.then(function(xhr, response) {
-  var widgetId = response;
-  var url = BASE_URL + 'widget/' + widgetId;
+  // 9) Create the visualization widget
+  return qwest.post('/api/widget', {
+    visualization_id: visualizationId,
+    options: {
+      search: true,
+      share: false,
+      layout: true,
+      fullscreen: true,
+      zoom: true,
+      legend: true,
+      geo: false
+    }
+  });
+}).then(function(xhr, widgetKey) {
+  var widgetUrl = BASE_URL + '/widget/' + widgetKey;
 
-  var code = '<iframe src="' + url + '" width="100%" height="400" frameborder="0" ' +
+  var code = '<iframe src="' + widgetUrl + '" width="100%" height="400" frameborder="0" ' +
     'webkitallowfullscreen mozallowfullscreen allowfullscreen>' +
-    '</iframe><p><a href="' + url + '" target="_blank">My visualization</a> ' +
+    '</iframe><p><a href="' + widgetUrl + '" target="_blank">My visualization</a> ' +
     'on <a href="https://linkurio.us" target="_blank">Linkurious</a>.</p>';
 
   document.getElementById('container').innerHTML = code;
 })
-
 .catch(function(e) {
   document.getElementById('container').textContent = e;
   throw e;

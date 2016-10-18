@@ -1,9 +1,6 @@
-var url = 'http://crunchbase.linkurio.us/api/<EDIT_HERE>';
+qwest.base = 'http://crunchbase.linkurio.us';
+qwest.setDefaultOptions({withCredentials: true});
 
-qwest.get(url, null, {
-  cache: true // enable preflight requests
-})
-
-// the following callbacks validate your submission
+qwest.get('/api/<EDIT_HERE>')
 .then(test)
 .catch(error);

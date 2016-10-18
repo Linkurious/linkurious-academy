@@ -7,6 +7,7 @@ var LKTutorials = {};
   var
     _ROOT = './data/',
     _VERSION = '?r=' + Date.now(),
+    _APIDOC_URL = 'https://linkurious.github.io/server-apidoc/',
 
     _lessons = {},
     _units = [],
@@ -147,7 +148,9 @@ var LKTutorials = {};
       unitId: unitId,
       id: exerciseId,
       ueid: ueid,
+      noCode: _exercisesIndex[ueid].noCode,
       title: _exercisesIndex[ueid].title,
+      apiDocAnchor: _exercisesIndex[ueid].apiDocAnchor,
       path: exercisePath(lessonId, unitId, exerciseId),
       language: _exercisesIndex[ueid].language || 'js',
       defaultCode: null,
@@ -165,16 +168,23 @@ var LKTutorials = {};
 
     // Load exercise data in parallel, continue after all data is loaded
     return Promise.join(
-      httpGetAsync(exercisePath(lessonId, unitId, exerciseId) + 'instructions.html')
-      .then(function(res) {
-        document.getElementById('instructions').innerHTML = res;
-      })
-      .catch(function(err) {
+      // load instructions
+      httpGetAsync(exercisePath(lessonId, unitId, exerciseId) + 'instructions.html').then(function(res) {
+        var doc = '';
+        if (_curExercise.apiDocAnchor !== undefined) {
+          doc = '\n<p>You can read <a href="' + _APIDOC_URL + '#' + _curExercise.apiDocAnchor +
+            '" target="_blank">Linkurious\' API documentation</a> for help.</p>';
+        }
+        document.getElementById('instructions').innerHTML = res + doc;
+      }).catch(function(err) {
         notify('Instructions ' + err.statusText, 'danger');
       }),
 
-      httpGetAsync(exercisePath(lessonId, unitId, exerciseId) + 'default-code.' + _curExercise.language)
-      .then(function(res) {
+      // load default-code
+      Promise.resolve().then(function() {
+        if (_curExercise.noCode) { return Promise.reject('skip default-code loading'); }
+        return httpGetAsync(exercisePath(lessonId, unitId, exerciseId) + 'default-code.' + _curExercise.language);
+      }).then(function(res) {
         _curExercise.defaultCode = res;
 
         var lang = _curExercise.language;
@@ -187,27 +197,30 @@ var LKTutorials = {};
         _codeMirror.setValue(res);
         _codeMirror.focus();
 
-      })
-      .catch(function(err) {
+      }).catch(function(err) {
         document.getElementById('code').style.display = 'none';
         document.getElementById('run-btn').style.display = 'none';
         document.getElementById('reset-btn').style.display = 'none';
         document.getElementById('next-btn').disabled = '';
       }),
 
-      httpGetAsync(exercisePath(lessonId, unitId, exerciseId) + 'cheat-code.' + _curExercise.language)
-      .then(function(res) {
+      // load cheat-code
+      Promise.resolve().then(function() {
+        if (_curExercise.noCode) { return Promise.reject('skip cheat-code loading'); }
+        return httpGetAsync(exercisePath(lessonId, unitId, exerciseId) + 'cheat-code.' + _curExercise.language);
+      }).then(function(res) {
         _curExercise.cheatCode = res;
-      })
-      .catch(function(err) {
+      }).catch(function(err) {
         document.getElementById('cheat-btn').style.display = 'none';
       }),
 
-      httpGetAsync(exercisePath(_curExercise.lessonId, _curExercise.unitId, _curExercise.id) + 'validation-code.js')
-      .then(function(res) {
+      // load validation-code
+      Promise.resolve().then(function() {
+        if (_curExercise.noCode) { return Promise.reject('skip validation-code loading'); }
+        return httpGetAsync(exercisePath(_curExercise.lessonId, _curExercise.unitId, _curExercise.id) + 'validation-code.js');
+      }).then(function(res) {
         _curExercise.validationCode = res;
-      })
-      .catch(function(err) {
+      }).catch(function(err) {
         document.getElementById('run-btn').style.display = 'none';
         document.getElementById('reset-btn').style.display = 'none';
         document.getElementById('next-btn').disabled = '';
@@ -249,20 +262,20 @@ var LKTutorials = {};
   };
 
   LKTutorials.onResultSuccess = function() {
-    // The student passed the exercice
+    // The student passed the exercise
     document.getElementById('next-btn').disabled = '';
     document.getElementById('validation-output').textContent = 'SUCCESS';
     document.getElementById('validation-output').style.color = 'green';
   };
 
   LKTutorials.onResultError = function() {
-    // The student failed the exercice
+    // The student failed the exercise
     document.getElementById('next-btn').disabled = 'disabled';
     document.getElementById('validation-output').textContent = 'FAIL';
     document.getElementById('validation-output').style.color = 'red';
   };
 
-  LKTutorials.nextExercice = function() {
+  LKTutorials.nextExercise = function() {
     var nextUnitId = _curExercise.unitId;
     var nextExerciseId = _exercisesIndex[_curExercise.ueid].next;
 
@@ -316,19 +329,19 @@ var LKTutorials = {};
 
   function isLesson(lessonId) {
     return lessonId !== undefined && lessonId in _lessons;
-  };
+  }
 
   function isUnit(lessonId, unitId) {
     return isLesson(lessonId) && unitId in _unitsIndex;
-  };
+  }
 
   function isExercise(lessonId, unitId, exerciseId) {
     if(!isUnit(lessonId, unitId)) return false;
 
     return _unitsIndex[unitId].exercises.filter(function(e) {
-        return e.id === exerciseId;
-      }).length != 0;
-  };
+      return e.id === exerciseId;
+    }).length != 0;
+  }
 
   function lessonPath(lessonId) {
     return '/lessons/' + lessonId + '/';

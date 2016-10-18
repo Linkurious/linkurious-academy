@@ -1,9 +1,12 @@
-var url = 'http://crunchbase.linkurio.us/api/status';
+// set the domain of the Linkurious server
+qwest.base = 'http://crunchbase.linkurio.us';
 
-qwest.get(url, null, {
-  cache: true // enable preflight requests
-})
+qwest.setDefaultOptions({
+  // enable cookies in cross-domain requests
+  withCredentials: true
+});
 
+qwest.get('/api/status')
 // the following callbacks validate your submission
 .then(test)
 .catch(error);

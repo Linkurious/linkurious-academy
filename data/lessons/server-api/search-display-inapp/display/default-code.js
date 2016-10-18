@@ -1,59 +1,48 @@
-var BASE_URL = 'http://crunchbase.linkurio.us/';
+qwest.base = 'http://crunchbase.linkurio.us';
+qwest.setDefaultOptions({withCredentials: true});
 
-var queryString  = 'energy';
+var loginData = {usernameOrEmail: 'Student 0', password: 'student0'};
+var searchQuery = 'energy';
 var source;
 
-var qwestOpts = { cache: true, withCredentials: true };
+// 1) Authenticate
+qwest.post('/api/auth/login', loginData).then(function() {
 
-// Authenticate user
-qwest.post(BASE_URL + 'api/auth/login', {
-  usernameOrEmail: 'Student 0',
-  password: 'student0',
-}, qwestOpts)
+  // 2) List data-sources
+  return qwest.get('/api/dataSources');
+}).then(function(xhr, response) {
 
-// Discover datasources
-.then(function() {
-  return qwest.get(BASE_URL + 'api/dataSources', null, qwestOpts);
-})
-
-// Search nodes
-.then(function(xhr, response) {
-  // Pick first datasource
+  // 3) Check that the first data-source is ready
   source = response.sources[0];
-
-  if (source && source.connected && source.state == 'ready') {
-    var url = BASE_URL + 'api/' + source.key + '/search/nodes';
-    return qwest.get(url, {
-      q: encodeURIComponent(queryString),
-      fuzziness: 0.6,
-      size: 10 // maximum number of results wanted
-    }, qwestOpts);
+  if (!source || !source.connected || source.state !== 'ready') {
+    throw 'Source unavailable';
   }
-  throw 'Source unavailable';
-})
 
-// Get a node and its neighborhood from search results
-.then(function(xhr, response) {
-  if (response && response.totalHits && response.results[0].children.length) {
+  // 4) Search nodes matching [searchQuery] in the first data-source
+  return qwest.get('/api/' + source.key + '/search/nodes', {
+    q: searchQuery,
+    fuzziness: 0.6,
+    size: 10 // maximum number of results wanted
+  });
 
-    // Pick first hit
-    var nodeId = response.results[0].children[0].id;
+}).then(function(xhr, response) {
 
-    var url = BASE_URL + 'api/' + source.key + '<EDIT_HERE>';
-
-    return qwest.post(url, {
-      ids: [ nodeId ],
-      limit: 50,  // maximum number of nodes to return
-      limitType: 'highestDegree' // return the most connected nodes
-    }, qwestOpts);
+  // 5) Check that there are matching nodes
+  if (!response || !response.totalHits || !response.results[0].children.length) {
+    throw 'No results found';
   }
-  throw 'No results found';
-})
 
-// Format results as a graph
-.then(function(xhr, response) {
-  var graph = { nodes: [], edges: [] };
+  // 6) Load the fist matching node with its neighbors
+  var nodeId = response.results[0].children[0].id;
+  return qwest.post('/api/' + source.key + '<EDIT_HERE>', {
+    ids: [nodeId],
+    limit: 50,  // maximum number of nodes to return
+    limitType: 'highestDegree' // return the most connected nodes
+  });
+}).then(function(xhr, response) {
 
+  // 7) Format the response as a graph
+  var graph = {nodes: [], edges: []};
   var edgeIds = {};
 
   response.forEach(function(node) {
@@ -68,32 +57,28 @@ qwest.post(BASE_URL + 'api/auth/login', {
     });
 
     // Add edges without duplicates
-    node.edges
-      .filter(function(edge) {
-        return !edgeIds[edge.id];
-      })
-      .forEach(function(edge) {
-        edgeIds[edge.id] = true;
-        graph.edges.push(edge);
-      });
+    node.edges.filter(function(edge) {
+      return !edgeIds[edge.id];
+    }).forEach(function(edge) {
+      edgeIds[edge.id] = true;
+      graph.edges.push(edge);
+    });
   });
 
-  // Create a container for the visualization
+  // 8) Create a container for the visualization
   var graphContainerElt = document.createElement('div');
   graphContainerElt.id = 'graph-container';
   document.body.insertBefore(graphContainerElt, document.getElementById('response'));
 
-  // Instantiate sigma
+  // 9) Instantiate sigma
   var sigmaInstance = new sigma({
     graph: graph,
     container: 'graph-container'
   });
-
   sigmaInstance.bind('clickNode', function(e) {
     var nodeProperties = e.data.node.data;
     document.getElementById('response').textContent = JSON.stringify(nodeProperties);
   });
 })
-
 .then(test)
 .catch(error);

@@ -1,5 +1,19 @@
-<p>The user (you, during this tutorial) needs to open a session of Linkurious for the links to work. <a href="http://crunchbase.linkurio.us/" target="_blank">Click here</a> to open Linkurious, then log in with the username <strong>"Student 0"</strong> and password <strong>"student0"</strong>. Notice that seamless authentication will be available in the future.</p>
 
-<p>Finally, validate the following code directly.</p>
+<p>
+    Notice that in the following exercises, you are logging into Linkurious before opening the visualization.<br/>
+    The domain of the current page is <code>academy.linkurio.us</code> and the domain of the Linkurious server is
+    <code>crunchbase.linkurio.us</code>.<br/>
 
-<p>You can access the documentation <a href="http://linkurio.us/docs/api/#api-visualization-getSandbox" target="_blank">here</a>.</p>
+</p>
+
+<p>
+    In order to enable login to the Linkurious server from your custom application, we recommend that you
+    host your Linkurious server at a domain like <code>linkurious.example.com</code> and your custom application
+    at <code>app.example.com</code>.<br/>
+    At the same time, set the <code>server.cookieDomain</code> to <code>.example.com</code> (notice the leading <code>.</code>)
+    in the Linkurious configuration file. This allows the Linkurious session cookie to be shared across all
+    <code>*.domain.com</code> sub-domains.
+</p>
+
+<p>Validate the following code directly.</p>
+

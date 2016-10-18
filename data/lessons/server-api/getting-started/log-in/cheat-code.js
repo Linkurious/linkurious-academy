@@ -1,12 +1,18 @@
-var url = 'http://crunchbase.linkurio.us/api/auth/login';
-var data = {
+// set the domain of the Linkurious server
+qwest.base = 'http://crunchbase.linkurio.us';
+
+qwest.setDefaultOptions({
+  // enable cookies in cross-domain requests
+  withCredentials: true
+});
+
+var loginData = {
   usernameOrEmail: 'Student 0',
-  password: 'student0',
+  password: 'student0'
 };
 
-qwest.post(url, data, {
-  withCredentials: true // enable cookies in cross-domain requests
-})
+// send login data to login API endpoint
+qwest.post('/api/auth/login', loginData)
 // the following callbacks validate your submission
 .then(test)
 .catch(error);

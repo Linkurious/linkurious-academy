@@ -340,13 +340,13 @@ qwest.get(BASE_URL + 'api/status', null, qwestOpts)
 .then(function() {
   return qwest.post(BASE_URL + 'api/auth/login', {
     usernameOrEmail: 'Student 0',
-    password: 'student0',
+    password: 'student0'
   }, qwestOpts)
 })
 
 // Discover datasources
 .then(function() {
-  return qwest.get(BASE_URL + 'api/dataSources', null, qwestOpts);
+  return qwest.get('/api/dataSources');
 })
 
 // Save source

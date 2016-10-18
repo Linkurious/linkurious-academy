@@ -1,10 +1,5 @@
 function validate(answer) {
-  return new Promise(function(resolve, reject) {
-    if (answer == 42) {
-      resolve();
-    }
-    else {
-      reject('Edit the "answer" variable.');
-    }
-  });
+  if (answer != 42) {
+    return Promise.reject('Edit the "answer" variable.');
+  }
 }

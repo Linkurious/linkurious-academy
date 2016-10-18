@@ -1,7 +1,9 @@
-var url = 'http://crunchbase.linkurio.us/api/<EDIT_HERE>';
-var data = {
+qwest.base = 'http://crunchbase.linkurio.us';
+qwest.setDefaultOptions({withCredentials: true});
+
+var loginData = {
   usernameOrEmail: '<EDIT_HERE>',
-  password: '<EDIT_HERE>',
+  password: '<EDIT_HERE>'
 };
 
-qwest.post(url, data, {withCredentials: true}).then(test).catch(error);
+qwest.post('/api/<EDIT_HERE>', loginData).then(test).catch(error);

@@ -1,39 +1,35 @@
-var BASE_URL = 'http://crunchbase.linkurio.us/';
+// set the domain of the Linkurious server
+qwest.base = 'http://crunchbase.linkurio.us';
 
-var queryString  = 'energy';
+qwest.setDefaultOptions({
+  // enable cookies in cross-domain requests
+  withCredentials: true
+});
+
+var searchQuery = 'energy';
 var source;
 
-var qwestOpts = {
-  cache: true,
-  withCredentials: true
-};
+// 1) Authenticate
+var loginData = {usernameOrEmail: 'Student 0', password: 'student0'};
+qwest.post('/api/auth/login', loginData).then(function() {
 
-// Authenticate user
-qwest.post(BASE_URL + 'api/auth/login', {
-  usernameOrEmail: 'Student 0',
-  password: 'student0',
-}, qwestOpts)
+  // 2) List data-sources
+  return qwest.get('/api/dataSources');
+}).then(function(xhr, response) {
 
-// Discover datasources
-.then(function() {
-  return qwest.get(BASE_URL + 'api/dataSources', null, qwestOpts);
-})
-
-// Search nodes
-.then(function(xhr, response) {
-  // Pick first datasource
+  // 3) Check that the first data-source is ready
   source = response.sources[0];
-
-  if (source && source.connected && source.state == 'ready') {
-    var url = BASE_URL + 'api/' + source.key + '/search/nodes';
-    return qwest.get(url, {
-      q: encodeURIComponent(queryString),
-      fuzziness: 0.6,
-      size: 10 // maximum number of results wanted
-    }, qwestOpts);
+  if (!source || !source.connected || source.state !== 'ready') {
+    throw 'Source unavailable';
   }
-  throw 'Source unavailable';
-})
 
+  // 4) Search nodes
+  return qwest.get('/api/' + source.key + '/search/nodes', {
+    q: searchQuery,
+    fuzziness: 0.6,
+    size: 10 // maximum number of results wanted
+  });
+})
+// the following callbacks validate your submission
 .then(test)
 .catch(error);

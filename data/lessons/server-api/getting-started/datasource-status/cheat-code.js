@@ -1,9 +1,13 @@
-var url = 'http://crunchbase.linkurio.us/api/dataSources';
+// set the domain of the Linkurious server
+qwest.base = 'http://crunchbase.linkurio.us';
 
-qwest.get(url, null, {
-  cache: true // enable preflight requests
-})
+qwest.setDefaultOptions({
+  // enable cookies in cross-domain requests
+  withCredentials: true
+});
 
+// request the list of data-sources
+qwest.get('/api/dataSources')
 // the following callbacks validate your submission
 .then(test)
 .catch(error);

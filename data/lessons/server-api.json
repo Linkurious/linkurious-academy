@@ -20,16 +20,19 @@
         "id": "server-status",
         "next": "datasource-status"
       }, {
-        "title": "Discover datasources",
+        "title": "Discover data-sources",
         "id": "datasource-status",
-        "next": "log-in"
+        "next": "log-in",
+        "apiDocAnchor": "api-Linkurious-DataSources"
       }, {
         "title": "Log in",
         "id": "log-in",
+        "apiDocAnchor": "api-Auth-login",
         "next": "log-out"
       }, {
         "title": "Log out",
-        "id": "log-out"
+        "id": "log-out",
+        "apiDocAnchor": "api-Auth-logout"
       }
     ]
   },
@@ -41,31 +44,37 @@
       {
         "title": "Introduction",
         "id": "intro",
+        "noCode": true,
         "next": "one-node"
       },
       {
         "title": "Open with a single node",
         "id": "one-node",
+        "apiDocAnchor": "api-visualization-getSandbox",
         "next": "one-edge"
       },
       {
         "title": "Open with a single edge",
         "id": "one-edge",
+        "apiDocAnchor": "api-visualization-getSandbox",
         "next": "one-node-neighborhood"
       },
       {
         "title": "Open with node connections",
         "id": "one-node-neighborhood",
+        "apiDocAnchor": "api-visualization-getSandbox",
         "next": "search-query"
       },
       {
         "title": "Open with a search query",
         "id": "search-query",
+        "apiDocAnchor": "api-visualization-getSandbox",
         "next": "graph-query"
       },
       {
         "title": "Open with a graph query",
-        "id": "graph-query"
+        "id": "graph-query",
+        "apiDocAnchor": "api-visualization-getSandbox"
       }
     ]
   },
@@ -77,26 +86,31 @@
       {
         "title": "Introduction",
         "id": "intro",
+        "noCode": true,
         "next": "search-nodes"
       },
       {
         "title": "Search nodes",
         "id": "search-nodes",
+        "apiDocAnchor": "api-Search-search",
         "next": "get-node"
       },
       {
         "title": "Get node from search results",
         "id": "get-node",
+        "apiDocAnchor": "api-Nodes-GetNode",
         "next": "get-node-neighborhood"
       },
       {
         "title": "Get node's neighborhood",
         "id": "get-node-neighborhood",
+        "apiDocAnchor": "api-Nodes-GetAdjacentGraph",
         "next": "display"
       },
       {
         "title": "Display the graph",
         "id": "display",
+        "apiDocAnchor": "api-Nodes-GetAdjacentGraph",
         "next": "interactive-viz"
       },
       {
@@ -113,21 +127,25 @@
       {
         "title": "Introduction",
         "id": "intro",
+        "noCode": true,
         "next": "query-graph"
       },
       {
         "title": "Query the graph",
         "id": "query-graph",
+        "apiDocAnchor": "api-Graph-RunRawGraphQuery",
         "next": "create-viz"
       },
       {
         "title": "Create a visualization",
         "id": "create-viz",
+        "apiDocAnchor": "api-visualization-createVisualization",
         "next": "create-widget"
       },
       {
         "title": "Create a widget",
         "id": "create-widget",
+        "apiDocAnchor": "api-visualization-createVisualizationWidget",
         "next": "embed-widget"
       },
       {

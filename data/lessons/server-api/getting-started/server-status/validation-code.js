@@ -1,10 +1,8 @@
 function validate(answer) {
-  return new Promise(function(resolve, reject) {
-    if (answer && answer.status && answer.status.code == 200) {
-      resolve();
-    }
-    else {
-      reject();
-    }
-  });
+  if (!answer) {
+    Promise.reject('Cannot validate server response (undefined)');
+  }
+  if (!answer.status || answer.status.code !== 200)  {
+    Promise.reject('Unexpected HTTP status');
+  }
 }
