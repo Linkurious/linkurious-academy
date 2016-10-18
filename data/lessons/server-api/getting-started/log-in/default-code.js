@@ -4,4 +4,4 @@ var data = {
   password: '<EDIT_HERE>',
 };
 
-qwest.post(url, data, { cache: true }).then(test).catch(error);
+qwest.post(url, data, {cache: true, withCredentials: true}).then(test).catch(error);
