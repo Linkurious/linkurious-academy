@@ -5,9 +5,8 @@ var data = {
 };
 
 qwest.post(url, data, {
-  cache: true // enable preflight requests
+  withCredentials: true // enable cookies in cross-domain requests
 })
-
 // the following callbacks validate your submission
 .then(test)
 .catch(error);
